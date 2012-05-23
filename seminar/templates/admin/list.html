@@ -1,0 +1,15 @@
+[
+{% for lecture in lectures %}
+  {
+    "id": {{lecture.id}},
+    "title": "{{lecture.title}}",
+    "subject": "{{lecture.subject}}",
+    "grouping": {{lecture.grouping}},
+    "speaker": "{{lecture.speaker}}",
+    "bio": "{{lecture.bio}}",
+    "capacity": {{lecture.capacity}},
+    "schedule" : "{{lecture.schedule}}",
+    "abstract" : "{{lecture.abstract|replace("\n","\\n")|replace("\r","\\r")|replace("\"","\\\"")}}"
+  }{% if not loop.last %},{% endif %}
+{% endfor %}
+]

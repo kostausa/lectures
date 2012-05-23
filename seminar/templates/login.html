@@ -1,0 +1,142 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+  <link rel="stylesheet" href="static/css/login.css" type="text/css" />
+{% endblock %}
+
+{% block body %}
+<div class="login">
+
+  <div class="header">
+    {{config.YEAR}} KOSTA/USA 세미나 등록
+  </div>
+  
+  <div class="ask">
+    등록하실 때 사용하신 이메일 주소를 입력하시면 세미나 등록 링크를 보내드립니다. 
+  </div>
+
+  <form class="form-vertical">
+  <div id="fields">
+    <input type="text" name="email" id="email" placeholder="Email">
+  </div>
+
+  <div id="msg" class="alert hide">
+  </div>
+
+  <div class="action">
+    <button class="btn btn-large btn-info pull-right" data-loading-text="등록정보를 확인하고 있습니다.">
+     등록링크 받기
+    </button>
+    <div id="spin" class="pull-right"></div>
+  </div>
+  
+
+  </form>
+
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="/static/js/spin.min.js"></script>
+<script type="text/javascript">
+
+var Seminar = Seminar || {};
+
+if (!window.console) console = {};
+console.log = console.log || function(){};
+console.warn = console.warn || function(){};
+console.error = console.error || function(){};
+console.info = console.info || function(){};
+
+Seminar.login = (function() {
+
+  var mail = {
+    request: function(email) {
+      $.ajax({
+        type: "POST",
+        url: "/link",  
+        data: {
+          "email": email
+        }, 
+        success: mail.success,
+        error: mail.error
+      });
+    },
+    success: function(data) {
+
+      console.log(data);
+
+      if (data === undefined || 
+          data.result === undefined ||
+          data.result !== 'sent' ) {
+        mail.error(data);
+        return undefined;
+      }
+
+      $('#msg')
+        .addClass('alert-success')
+        .html(
+          "전송을 마쳤습니다. 이메일 안에 있는 링크를 사용하셔서 세미나 등록을 시작해 주세요."
+        )
+        .slideDown('fast');
+
+      mail.resolve(10);
+    },
+    error: function(data) {
+      var errmsg = "시스템에 오류가 있었습니다";
+      if (data && data.result === "invalid") {
+        errmsg = "등록정보를 찾을 수 없었습니다. 등록팀에게 문의해 주시길 바랍니다";
+      }
+      $('#msg')
+        .addClass('alert-error')
+        .html(
+          "이메일이 전송되지 못했습니다 - " + errmsg
+        )
+        .slideDown('fast');   
+
+      mail.resolve(3);   
+    },
+    resolve: function(sec) {
+      setTimeout(function() {
+        mail.hide();
+      },(sec*1000));
+
+      $('.login button').button('reset');
+      $('#spin').html('');
+    },
+    hide: function() {
+      $('#msg')
+        .fadeOut('fast')
+        .removeClass('alert-success')
+        .removeClass('alert-error');
+    }
+  };
+
+  return {
+    setup: function() {
+
+      $('.login button')
+        .click(function(e) {
+          var email = $('#email').val();
+          e.preventDefault();     
+          if (email.length < 1) {
+            alert('이메일을 입력해 주세요');
+            return undefined;
+          }
+
+          $(this).button('loading');
+          $('#spin').spin();
+
+          mail.request(email);
+        });
+
+    }
+  }
+}());
+
+</script>
+{% endblock %}
+
+{% block setupjs %}
+Seminar.login.setup();
+{% endblock %}

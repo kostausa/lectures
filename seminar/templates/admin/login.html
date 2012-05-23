@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+  <link rel="stylesheet" href="/static/css/login.css" type="text/css" />
+{% endblock %}
+
+
+{% block body %}
+
+<div class="login">
+
+  <div class="header">
+    {{config.YEAR}} KOSTA/USA 세미나 관리자
+  </div>
+  
+  <form action="/admin/login" method="POST">
+  <div id="fields">
+    <input type="password" name="pass" id="pass" placeholder="Password">
+    <div class="conference">
+      <div class="controlgroup">
+      <div class="controls">
+        <label class="radio">
+          <input type="radio" name="conf" id="conf0" value="0" checked> Chicago Conference
+        </label>  
+        <label class="radio">
+          <input type="radio" name="conf" id="conf1" value="1"> Indianapolis Conference
+        </label>  
+      </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="msg" class="alert hide">
+  </div>
+
+  <div class="action">
+    <button class="btn btn-large btn-info pull-right" data-loading-text="정보확인중">
+     로그인
+    </button>
+    <div id="spin" class="pull-right"></div>
+  </div>
+  
+  </form>
+
+</div>
+
+{% endblock %}

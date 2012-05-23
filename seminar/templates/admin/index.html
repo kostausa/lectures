@@ -1,0 +1,512 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+  <link rel="stylesheet" href="/static/css/seminar.css" type="text/css" />
+  <link rel="stylesheet" href="/static/css/admin.css" type="text/css" />
+{% endblock %}
+
+{% block body %}
+
+<div class="row-fluid" id="admin-container">
+<div class="span5 workside">
+
+<form class="form-horizontal">
+  <fieldset>
+    <legend>
+      {{ conf }} Conference
+    </legend>
+    
+    <div class="control-group">
+      <label class="control-label" for="seminar-group">분류</label>
+      <div class="controls">
+        {% if chicago %}
+        <select id="seminar-group">
+          <option value="0">기초과목별(Core)</option>
+          <option value="1">상황별(Context)</option>
+          <option value="2">관심별(Concentration)</option>
+          <option value="3">전문인 그리스도인 (TM)</option>
+        </select>
+        {% else %}
+        <select id="seminar-group">
+          <option value="0">토픽별(Topic)</option>
+          <option value="1">상황별(Context)</option>
+        </select>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="seminar-subject">주제</label>
+      <div class="controls">
+        <input type="text" class="input-large" id="seminar-subject">
+        <p class="help-block">(Example: 셰계관, 제자도, etc)</p>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="seminar-speaker">강사</label>
+      <div class="controls">
+        <input type="text" class="input-large" id="seminar-speaker">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="seminar-title">강의제목</label>
+      <div class="controls">
+        <input type="text" class="span12" id="seminar-title">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="seminar-abstract">개요 (Abstract)</label>
+      <div class="controls">
+        <textarea class="span12" id="seminar-abstract" rows="10"></textarea>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="seminar-bio">강사 프로필</label>
+      <div class="controls">
+        <textarea class="span12" id="seminar-bio" rows="3"></textarea>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label class="control-label" for="seminar-capacity">교실인원</label>
+      <div class="controls">
+        <input type="text" class="input-large" id="seminar-capacity">
+      </div>
+    </div>
+
+    <div class="control-group">
+    <label class="control-label" for="optionsCheckbox">강의 스케줄</label>
+    <div class="controls sessions">
+      {% if chicago %}
+      
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session1" value="1">
+          Session 1 &mdash; 화요일 (1:45pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session2" value="2">
+          Session 2 &mdash; 화요일 (3:20pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session3" value="3">
+          Session 3 &mdash; 수요일 (1:45pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session4" value="4">
+          Session 4 &mdash; 목요일 (1:45pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session5" value="5">
+          Session 5 &mdash; 목요일 (3:20pm)
+        </label>
+      
+      {% else %}
+      
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session1" value="1">
+          Session 1 &mdash; 화요일 (1:30pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session2" value="2">
+          Session 2 &mdash; 화요일 (3:30pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session3" value="3">
+          Session 3 &mdash; 수요일 (1:30pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session4" value="4">
+          Session 4 &mdash; 수요일 (3:30pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session5" value="5">
+          Session 5 &mdash; 목요일 (1:30pm)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="session" id="session6" value="6">
+          Session 6 &mdash; 목요일 (3:30pm)
+        </label>
+
+      {% endif %}
+    </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary pull-right">세미나 추가</button>
+    </div>
+
+  </fieldset>
+</form>
+
+</div>
+<div class="span7 listside">
+
+  <div id="seminar-list"></div>
+
+</div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="/static/js/underscore-min.js"></script>
+<script type="text/javascript" src="/static/js/backbone-min.js"></script>
+
+<script type="text/javascript">
+
+var Seminar = {};
+Seminar.context = {
+  conf: {% if chicago %}0{% else %}1{% endif %}
+};
+
+Seminar.template = (function() {
+  var cache = {};
+  return {
+    render: function(id, params) {
+      var t;
+      if (id in cache) {
+        t = cache[id];
+      } else {
+        var txt = $('#'+id).text();
+        t = Hogan.compile(txt);
+        cache[id] = t;
+      }      
+      return t.render(params);
+    }
+  }
+})();
+
+Seminar.admin = (function() {
+
+  var Lecture = Backbone.Model.extend({
+    initialize: function() {
+      _.bindAll(this, 'save', 'unsync');
+    },
+    save: function() {
+
+      var _self = this;
+
+      $.ajax({
+        type: 'POST',
+        url: '/admin/create',
+        data: {
+          grouping: _self.get('grouping'),
+          subject: _self.get('subject'),
+          title: _self.get('title'),
+          speaker: _self.get('speaker'),
+          bio: _self.get('bio'),
+          capacity: _self.get('capacity'),
+          abstract: _self.get('abstract'),
+          schedule: _self.get('schedule')
+        },
+        success: function(data) {
+          if (data) {
+            _self.set('id', data.id);
+            _self.trigger('sync');
+          }
+        },
+        error: function() {
+          alert('error');
+        }
+      });
+
+    },
+    update: function() {
+      var _self = this;
+
+      $.ajax({
+        type: 'POST',
+        url: '/admin/update',
+        data: {
+          id: this.get('id'),
+          abstract: this.get('abstract'),
+          bio: this.get('bio')
+        },
+        success: function(data) {
+          _self.trigger('update', _self);
+        },
+        error: function(data) {
+          alert('오류가 있었습니다.');
+        }
+      });
+    },
+    unsync: function() {
+      var _self = this;
+
+      $.ajax({
+        type: 'POST',
+        url: '/admin/delete',
+        data: {
+          id: this.get('id')
+        },
+        success: function(data) {
+          _self.trigger('destroy', _self);
+        },
+        error: function(data) {
+          alert('오류가 있었습니다.');
+        }
+      });
+    }
+  });
+
+  var LectureList = Backbone.Collection.extend({
+    initialize: function() {
+      _.bindAll(this, 'load');
+    },
+    load: function() {
+      var _self = this;
+
+      $.ajax({
+        type: 'GET',
+        url: '/admin/list',
+        success: function(data) {
+          for (var i in data) {
+            var item = new Lecture(data[i]);
+            _self.add(item);
+          }
+          _self.trigger('loaded');
+        },
+        error: function(data) {
+          alert('error loading lecture');
+        }
+      });      
+    }
+  });
+
+  var LectureView = Backbone.View.extend({
+    dirty: false,
+    className: 'lecture-entry',
+    events: {
+      "click a": "toggleDesc",
+      "click i": "sendRemove",
+      "click button": "sendUpdate"
+    },
+    initialize: function() {
+      _.bindAll(this, 'render', 'toggleDesc', 'sendRemove', 
+        'unrender', 'sendUpdate');
+      this.model
+        .on('destroy', this.unrender)
+        .on('update', this.confirm);
+    },
+    confirm: function() {
+      var _self = this;
+      $('button',this.el).button('complete');
+      setTimeout(function() {
+        $('button',_self.el).button('reset');
+      },2000);
+    },
+    unrender: function() {
+      $(this.el).remove();
+      return false;
+    },
+    toggleDesc: function() {
+      $(".description",this.el).toggle();
+    },
+    sendUpdate: function() {
+      this.model.update();
+      return false;
+    },
+    sendRemove: function() {
+      this.model.unsync();
+      return false;
+    },
+    render: function() {
+      var i;
+      var schedule = [];
+      for (i=0;i<5+Seminar.context.conf;i++) {
+        schedule[i] = {
+          on: false
+        };
+      }
+
+      var offer = this.model.get('schedule').split(',');
+      for (i in offer) {
+        var index = parseInt(offer[i]) - 1;
+        schedule[index] = {
+          on: true
+        }
+      }
+
+      $(this.el).html(
+        Seminar.template.render(
+          '_template-lecture',
+          {
+            title: this.model.get('title'),
+            speaker: this.model.get('speaker'),
+            abstract: this.model.get('abstract'),
+            subject: this.model.get('subject'),
+            capacity: this.model.get('capacity'),
+            bio: this.model.get('bio'),
+            schedule: schedule
+          }
+        )
+      );
+
+      var _self = this;
+      $('.abstract',this.el).change(function(e){
+        _self.dirty = true;
+        _self.model.set('abstract', $(e.target).val());
+      });
+
+      $('.bio', this.el).change(function(e) {
+        _self.dirty = true;
+        _self.model.set('bio', $(e.target).val());
+      });
+      return this;
+    }
+  });
+
+  var LectureListView = Backbone.View.extend({
+    el: $('#seminar-list'),
+    initialize: function() {
+      _.bindAll(this, 'render', 'appendItem', 'unregister');
+      this.collection = this.options;
+      this.collection.load();
+      this.collection
+        .on('loaded', this.render);
+    },
+    unregister: function(model) {
+      this.collection.remove(model);
+    },
+    render: function() {
+      console.log('loaded');
+
+      var _self = this;
+      _(this.collection.models).each(function(item) {
+        _self.appendItem(item);
+      }, this); 
+      this.collection.on('add', this.appendItem);
+      return this;
+    },
+    appendItem: function(item) {
+      var lecture = new LectureView({
+        model: item
+      });
+      item.on('destroy', this.unregister);
+      $(this.el).append(lecture.render().el);
+    }
+  });
+
+  var worksheet = {    
+    reset: function() {
+        $('#seminar-subject').val('');
+        $('#seminar-title').val('');
+        $('#seminar-speaker').val('');
+        $('#seminar-abstract').val('');
+        $('#seminar-bio').val('');
+        $('#seminar-capacity').val('');
+        $('.sessions input:checked').prop('checked', false);
+    },
+    'validate' : function() {
+      var checkids = [
+        'seminar-title', 
+        'seminar-subject',
+        'seminar-speaker',
+        'seminar-capacity'
+      ];
+      for (var i in checkids) {
+        if ($('#'+checkids[i]).val().length < 1) {
+          return false;
+        }
+      }    
+
+      if ($('.sessions input:checked').length < 1) {
+        return false;
+      }  
+
+      if (!(/^[0-9]+$/.test($('#seminar-capacity').val()))) {
+        return false;
+      }
+      return true;
+    },
+    'create' : function() {
+      if (!worksheet.validate()) {
+        alert('필요한 정보를 모두 입력해 주세요')
+        return false;
+      }
+
+      var schedule = '';
+      $('.sessions input:checked').each(function() {
+        if (schedule !== '') {
+          schedule += ',';
+        }
+        schedule += $(this).val();
+      });
+
+      return {
+        grouping: $('#seminar-group option:selected').val(),
+        subject: $('#seminar-subject').val(),
+        title: $('#seminar-title').val(),
+        speaker: $('#seminar-speaker').val(),
+        abstract: $('#seminar-abstract').val(),
+        schedule: schedule,
+        bio: $('#seminar-bio').val(),
+        capacity: parseInt($('#seminar-capacity').val())
+      };
+    }
+  };
+
+  return {
+    setup: function() {
+
+      var lectures = new LectureList();
+      var lecturelist = new LectureListView(lectures);
+
+      $('.workside button').click(function(e) {
+        e.preventDefault();
+        var item = worksheet.create();
+        if (item) {
+          var lecture = new Lecture(item);
+          lecture.on(
+            'sync', function() {
+              lectures.add(lecture);
+              worksheet.reset();
+            }
+          );
+          lecture.save();
+        }
+      });
+    }  
+  }
+})();
+
+</script>
+<script type="text/html" id="_template-lecture">
+{% raw %}
+
+    <div class="row-fluid">
+      <div class="span2">
+        <i class="icon-remove"></i>
+        [{{subject}}] 
+      </div>
+      <div class="span8 title">
+        <a href="#">{{title}}</a>
+      </div>
+      <div class="span2" style="text-align:right;">
+          <div>{{speaker}}</div>
+          <div class="blocks">
+            {{#schedule}}
+              {{#on}}<img src="/static/img/on.png">{{/on}}
+              {{^on}}<img src="/static/img/off.png">{{/on}}
+            {{/schedule}}
+          </div>
+      </div>
+    </div>
+
+    <div class="description hide">
+      <textarea class="abstract">{{abstract}}</textarea>
+      <textarea class="bio">{{bio}}</textarea>      
+      <button class="btn btn-success pull-right" data-loading-text="Saving..." data-complete-text="Saved!">Update</button>
+    </div>
+
+{% endraw %}
+</script>
+{% endblock %}
+
+{% block setupjs %}
+Seminar.admin.setup();
+{% endblock %}

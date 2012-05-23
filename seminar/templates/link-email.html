@@ -1,0 +1,12 @@
+{% extends 'email-master.html' %}
+
+{% block content %}
+
+  {{user.kname}}
+  {{user.gender|replace('M','형제님')|replace('F','자매님')}}께
+  <div style="margin-bottom:15px;font-size:1.2em;color:#28c;">    
+    다음은 2012 KOSTA/USA 세미나 등록을 위한 링크입니다. 
+  </div>
+  http://kostausa.org/seminar/open/{{user.secret}}
+
+{% endblock %}

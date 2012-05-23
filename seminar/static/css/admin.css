@@ -1,0 +1,42 @@
+.workside {
+  min-height:500px;
+  padding:10px 20px 10px 10px;
+}
+
+.listside {
+  padding:40px 10px 10px 10px;
+}
+
+.lecture-entry {
+  padding:4px;
+  border-bottom:1px solid #ddd;
+}
+
+.lecture-entry textarea {
+  width:98%;
+  height:100px;
+  margin-top:5px;
+}
+
+.description {
+  height:290px;
+}
+
+.description button {
+  margin-right:6px;
+}
+
+.lecture-entry a {
+  text-decoration: underline;
+  color:#26c;
+}
+
+.lecture-entry i {
+  opacity: 0.6;
+  cursor:pointer;
+}
+
+
+legend {
+  color:#28c;
+}
