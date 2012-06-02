@@ -1,0 +1,27 @@
+{
+"lectures":
+[
+{% for item in lectures %}
+  {
+    "id": {{item.id}},
+    "title": "{{item.title}}",
+    "subject": "{{item.subject}}",
+    "grouping": {{item.grouping}},
+    "speaker": "{{item.speaker}}",
+    "bio": "{{item.bio}}",
+    "capacity": {{item.capacity}},
+    "abstract" : "{{item.abstract|replace("\n","\\n")|replace("\r","\\r")|replace("\"","\\\"")}}"
+  }{% if not loop.last %},{% endif %}
+{% endfor %}
+],
+"sessions":[
+{% for item in sessions %}
+  {
+    "id"   : {{item.id}},
+    "slot" : {{item.slot}},
+    "lectureid" : {{item.lectureid}},
+    "state" : {{item.state}}
+  }{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+}

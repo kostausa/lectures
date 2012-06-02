@@ -1,0 +1,366 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class="row-fluid">
+<div class="span5">
+  &nbsp;
+</div> <!-- span5     -->
+<div class="span7" style="border-left:1px solid #eee;">
+
+<div id="schedule">
+  <ul class="nav nav-tabs" id="lectures">
+
+    {% if user.conf == 0 %}
+
+    <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
+    <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
+    <li><a href="#session3" data-toggle="tab">수요일 </a></li>
+    <li><a href="#session4" data-toggle="tab">목요일 1</a></li>
+    <li><a href="#session5" data-toggle="tab">목요일 2</a></li>
+
+    {% else %}
+
+    <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
+    <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
+    <li><a href="#session3" data-toggle="tab">수요일 1</a></li>
+    <li><a href="#session4" data-toggle="tab">수요일 2</a></li>
+    <li><a href="#session5" data-toggle="tab">목요일 1</a></li>
+    <li><a href="#session6" data-toggle="tab">목요일 2</a></li>
+
+    {% endif %}
+  </ul>
+  <div class="tab-content">
+    {% for item in sessions %}  
+    <div class="tab-pane{% if loop.first %} active{% endif %}" id="session{{sessions[item].slot}}">
+      <ul class="session" id="schedule{{sessions[item].slot}}"></ul>
+    </div>  
+    {% endfor %}
+  </div>
+</div>
+
+</div> <!-- span7     -->
+</div> <!-- row-fluid -->
+
+
+<div class="personal">
+
+<div class="header">
+  2012 KOSTA/USA
+  <span class="conf{{user.conf}}">{{user.conf|replace(1, 'Indianapolis')|replace(0, 'Chicago')}} Conference</span> 
+</div>
+<div class="hd">선택식 세미나 Schedule</div>
+<div class="user">
+  <i class="icon-home"></i>
+  {{user.kname}} | {{user.gender}} | {{user.email}}
+  {{user.track | replace('T','| 주제심화트랙') | replace('N','')}}
+</div>
+
+
+<div class="tickets">
+{% for item in sessions %}
+ <div class="oneticket" id="slot{{sessions[item].slot}}">
+    <div>
+      <span class="time">{{sessions[item].description}}</span>
+      <span class="speaker">
+        {% if sessions[item].assigned != None %}
+          {{ sessions[item].assigned.speaker }}
+        {% endif %}
+      </span>
+    </div>
+    <div class="content">
+    {% if user.track == 'T' and sessions[item].slot in [1,4,5] %}
+      <div class="trackwarn">
+        <i class="icon-chevron-right"></i> <i>주제심화 트랙에서 별도의 순서가 진행됩니다.</i>
+      </div>
+    {% else %}
+
+      {% if sessions[item].assigned != None %}
+        [ {{ sessions[item].assigned.subject }} ]
+        {{ sessions[item].assigned.title }} 
+        <div class="pull-right xholder">
+          <a href="#{{sessions[item].sessionid}}" class="remove"><i class="icon-remove"></i></a>
+        </div>
+      {% else %}
+      <div class="empty">
+        <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
+      </div>
+      {% endif %}
+
+    {% endif %}
+    </div>
+ </div>
+{% endfor %}
+</div>
+
+</div> <!-- personal  -->
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="/static/js/jquery.color.js"></script>
+<script type="text/javascript">
+
+if (typeof console == "undefined") var console = { log: function() {} }; 
+
+var Seminar = {};
+
+Seminar.context = {
+  conf: {{user.conf}},
+  track: '{{user.track}}'
+};
+
+Seminar.schedule = (function() {
+
+  var userid;
+
+  var lectures = {};
+  var sessions = {};
+
+  var ticket = {
+    remove: function(sessionid) {      
+      $.ajax({
+        type: 'POST',
+        url: '/api/remove',
+        data: {
+          "sessionid": sessionid,
+          "userid": userid
+        },
+        success: function(data) {
+          if (!(data && data.result)) {
+            return undefined;
+          }
+
+          var el = $('#slot'+data.slot);
+      
+          $('.speaker',el).html('');
+          $('.content',el).html($('#_template-empty').text());
+        },
+        error: function(data) {
+          alert("오류가 있었습니다");
+        }
+      });
+    }
+  };
+
+  var registration = {
+    go: function(id) {
+      $.ajax({
+        type: 'POST',
+        url: '/api/register',
+        data: {
+          "userid": userid,
+          "sessionid": id
+        },
+        success: function(data) {
+          if (!(data && data.result)) {
+            registration.error(data);
+            return undefined;
+          }
+
+          var el = $('#slot'+data.slot);
+          var _x = Hogan.compile($('#_template-remove').text());
+
+          $(el).animate({ backgroundColor: '#fffacd' }, 500);
+          setTimeout(function() {
+            $(el).animate({ backgroundColor: '#ffffff' }, 'slow');
+          },2000);
+
+          $('.speaker',el).html(data.speaker);
+          $('.content',el).html(
+            '[ '+data.subject+' ] ' + data.title +
+            _x.render({ sessionid: id })
+          );
+        },
+        error: function(data) {
+          switch(data.reason) {
+            case 'full':
+              alert('클래스 정원이 모두 찼습니다. 등록을 할수 없었습니다');
+              break;
+
+            case 'auth':
+            case 'invalid':
+            default:
+              alert('오류가 발생했습니다, 등록을 할수 없었습니다');
+              break;
+          }
+        }
+      });
+    }
+  };
+
+
+  var init = {
+    load: function(data) {
+      if (!(data && data.lectures && data.sessions)) {
+        return undefined;
+      }
+
+      for (var i in data.lectures) {
+        var item = data.lectures[i];
+        lectures[item.id] = item;
+      }
+
+      for (var i in data.sessions) {
+        var item = data.sessions[i];
+        if (item.state != 0 ||
+            !(item.lectureid in lectures)) {
+          // not offered
+          continue;
+        }
+
+        // client side join, yeah
+        var slot = item.slot;
+        item.lecture = $.extend({},lectures[item.lectureid]);
+        item.lecture.sessionid = item.id;
+        item.lecture.slot = item.slot;
+
+        var paragraphs = item.lecture.abstract.split(/\n/);
+        item.lecture.abstract = paragraphs;
+
+        if (!(slot in sessions)) {
+          sessions[slot] = [];
+        }
+        sessions[slot].push(item);
+      }
+      return init;
+    },
+    render: function() {
+
+      var _t = Hogan.compile(
+        $('#_template-lecture').text()
+      );
+
+      var _w = Hogan.compile(
+        $('#_template-trackwarn').text()
+      );
+
+      var i;
+      var num = (Seminar.context.conf == 0)?6:7;
+      for (i=1;i<num;i++) {
+        if (Seminar.context.conf == 0 &&
+            Seminar.context.track == 'T' &&
+            (i != 2 && i != 3)) {
+          // themed track
+          $('#session'+i).append(_w.render({}));
+          continue;
+        }
+        var el = $('#schedule'+i);
+
+        for (var s in sessions[i]) {
+          var item = sessions[i][s];
+          var source = {
+            lecture: item.lecture
+          };
+
+          $(el).append(
+            _t.render(source)
+          );
+
+        }
+      }
+
+      $('a.title, a.info').click(function(e) {
+        e.preventDefault();
+        var id = $(this).attr('href').substring(1);
+        $('.ab'+id).toggle();
+      });
+
+      $('a.reg').click(function(e) {
+        var id = $(this).attr('href').substring(1);
+        registration.go(id);
+      });
+    }
+  };
+
+  return {
+    setup: function(id) {      
+      userid = id;
+
+      $.ajax({
+        url: '/api/lectures/{{user.conf}}',
+        success: function(data) {
+          init
+            .load(data)
+            .render();
+        },
+        error: function(data) {
+          alert('오류가 있었습니다, 브라우저를 Reload 해주세요');
+        }
+      });
+
+      $('.tickets').on('click','a.remove', function(e) {
+        e.preventDefault();
+        var id = $(this).attr('href').substring(1);
+        ticket.remove(id);
+      });
+
+      if (Seminar.context.track == 'T') {
+        $('#lectures a:eq(1)').tab('show');
+      } else {
+        $('#lectures a:first').tab('show');
+      }
+    }
+  }
+
+})();
+</script>
+
+<!-- hogan.js to the rescue -->
+<script type="text/html" id="_template-lecture">
+{% raw %}
+{{#lecture}}
+<li class="lecture">
+  <div class="row-fluid">
+    <div class="span9">
+      [{{subject}}] {{speaker}}
+      <div style="margin-top:2px;">
+        &mdash; <a href="#{{sessionid}}" class="title">{{title}}</a>
+      </div>
+    </div>
+    <div class="span3">
+      <div class="actions pull-right">
+        <a href="#{{sessionid}}" class="info btn btn-mini"><i class="icon-search"></i></a>
+        <a href="#{{sessionid}}" class="reg btn btn-mini">Register</a>
+      </div>
+    </div>
+  </div>
+  <div class="row-fluid hide ab{{sessionid}}">
+    <div class="span12 abstract">
+      {{#abstract}}
+        <p>{{.}}</p>
+      {{/abstract}}
+    </div>
+  </div>
+</li>
+{{/lecture}}
+{% endraw %}
+</script>
+
+<script type="text/html" id="_template-trackwarn">
+<div class="empty">
+주제심화트랙 시간입니다.
+</div>
+</script>
+
+<script type="text/html" id="_template-empty">
+{% raw %}
+  <div class="empty">
+    <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
+  </div>
+{% endraw %}
+</script>
+
+<script type="text/html" id="_template-remove">
+{% raw %}
+  <span class="pull-right xholder">
+    <a href="#{{sessionid}}" class="remove"><i class="icon-remove"></i></a>
+  </span>
+{% endraw %}      
+</script>
+{% endblock %}
+
+{% block setupjs %}
+  Seminar.schedule.setup({{user.id}});
+{% endblock %}
+
