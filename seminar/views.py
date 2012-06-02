@@ -21,7 +21,7 @@ def sendlink(user,h):
       'link-email.html', 
       user=user,
       hash=h
-    ), 'html'
+    ).encode('UTF-8'), 'html', 'UTF-8'
   )
   
   msg['Subject'] = '2012 KOSTA/USA Seminar'
