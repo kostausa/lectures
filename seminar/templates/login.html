@@ -19,6 +19,18 @@
   <div id="fields">
     <input type="text" name="email" id="email" placeholder="Email">
   </div>
+  <div class="conference">
+    <div class="controlgroup">
+      <div class="controls">
+        <label class="radio">
+          <input type="radio" name="conf" id="conf0" value="0" checked> Chicago Conference
+        </label>  
+        <label class="radio">
+          <input type="radio" name="conf" id="conf1" value="1"> Indianapolis Conference
+        </label>  
+      </div>
+    </div>
+  </div>
 
   <div id="msg" class="alert hide">
   </div>
@@ -51,12 +63,13 @@ console.info = console.info || function(){};
 Seminar.login = (function() {
 
   var mail = {
-    request: function(email) {
+    request: function(email, conf) {
       $.ajax({
         type: "POST",
         url: "/link",  
         data: {
-          "email": email
+          "email": email,
+          "conf" : conf
         }, 
         success: mail.success,
         error: mail.error
@@ -83,15 +96,24 @@ Seminar.login = (function() {
       mail.resolve(10);
     },
     error: function(data) {
-      var errmsg = "시스템에 오류가 있었습니다";
-      if (data && data.result === "invalid") {
-        errmsg = "등록정보를 찾을 수 없었습니다. 등록팀에게 문의해 주시길 바랍니다";
+      var errmsg = "시스템에 오류가 있었습니다. 이메일이 전송되지 않았습니다.";
+      if (data) {
+        switch (data.result) {
+          case 'invalid':
+            errmsg = "등록정보를 찾을 수 없었습니다. 등록팀에게 문의해 주시길 바랍니다";
+            break;
+
+          case 'journey':
+            errmsg = "Journey KOSTA 는 자체적인 프로그램이 진행됩니다. 세미나에 등록하실 수 없습니다.";
+            break;
+
+          default:
+            break;
+        }
       }
       $('#msg')
         .addClass('alert-error')
-        .html(
-          "이메일이 전송되지 못했습니다 - " + errmsg
-        )
+        .html(errmsg)
         .slideDown('fast');   
 
       mail.resolve(3);   
@@ -106,9 +128,11 @@ Seminar.login = (function() {
     },
     hide: function() {
       $('#msg')
-        .fadeOut('fast')
-        .removeClass('alert-success')
-        .removeClass('alert-error');
+        .fadeOut('fast', function() {
+          $(this)
+            .removeClass('alert-success')
+            .removeClass('alert-error');
+        });
     }
   };
 
@@ -127,7 +151,8 @@ Seminar.login = (function() {
           $(this).button('loading');
           $('#spin').spin();
 
-          mail.request(email);
+          var conf = $('input[type=radio]:checked').val();
+          mail.request(email, conf);
         });
 
     }

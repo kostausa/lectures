@@ -1,5 +1,110 @@
 body {
   margin:0px;
   padding:0px;
-  font-family:'helvetica neue', 'helvetica';
+  font-family:'helvetica neue', 'helvetica', 'arial'
 }
+
+#schedule {
+  margin:10px 10px 10px 15px;
+}
+
+.personal {
+  position:fixed;
+  top:1px;
+  left:1px;
+  padding:10px 10px 10px 15px;
+  width:38%;
+}
+
+.header {
+  font-size:1.4em;
+  font-weight:200;
+}
+.header .conf0 { color:#c00; }
+.header .conf1 { color:#28c; }
+
+.hd { 
+  margin-top:5px;
+  font-size:1.2em;
+}
+
+.tickets {
+  margin-top:20px;
+}
+
+.tickets .oneticket {
+  padding:4px;
+  border-bottom: 1px dashed #aaa;
+  margin-bottom:20px;
+  padding-bottom:20px;
+}
+
+.oneticket .time {
+  color:#a42;
+}
+
+.user {
+  margin-top:10px;
+  padding:10px;
+  background-color:#efefef;
+
+  -webkit-border-radius:5px;
+     -moz-border-radius:5px;
+          border-radius:5px;
+}
+
+.empty {
+  opacity: 0.5;
+  -moz-opacity:0.5;
+  filter:alpha(opacity=50);
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"  
+}
+
+ul.session  {
+  list-style:none;
+  list-style-position:inside;
+  margin-left:0px;
+}
+
+.lecture {
+  color:#333;
+  padding:4px;
+  border-bottom:1px dashed #aaa;
+  padding-bottom:10px;
+  margin-bottom:10px;
+}
+
+.lecture .actions {
+  margin-top:17px;
+}
+.lecture .title {
+  margin-top:2px;
+  color:#000;
+  font-family:'NanumGothic','NanumGothicOTF','NanumGothicOTFBold', 'Helvetica Neue', 'Helvetica', 'Arial';
+  font-size:1.4em;
+  text-decoration:underline;
+  cursor:pointer;
+}
+
+.abstract {
+  padding:10px;
+}
+
+.xholder {
+  margin-left:30px;
+  text-align:right;
+  opacity: 0.5;
+  -moz-opacity:0.5;
+  filter:alpha(opacity=50);
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"    
+}
+
+.xholder a {
+  text-decoration:none;
+  cursor:pointer;
+}
+
+.trackwarn {
+  color:#eaa;
+}
+
