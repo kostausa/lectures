@@ -212,6 +212,9 @@ def begin(hash):
 
     return render_template('start.html', user=user, sessions=personal)
 
+@app.route("/")
+def index():
+  return render_template('login.html')
 
 @app.route("/login")
 def login():
