@@ -1,3 +1,7 @@
+#admin-container {
+  margin-top:30px;
+}
+
 .workside {
   min-height:500px;
   padding:10px 20px 10px 10px;
@@ -36,7 +40,11 @@
   cursor:pointer;
 }
 
-
 legend {
   color:#28c;
+}
+
+a.brand .conf {
+  color:#28c;
+  font-weight:200;
 }
