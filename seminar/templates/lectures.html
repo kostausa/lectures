@@ -11,7 +11,7 @@
     "schedule": "{{item.schedule}}",
     "bio": "{{item.bio}}",
     "capacity": {{item.capacity}},
-    "abstract" : "{{item.abstract|replace("\n","\\n")|replace("\r","\\r")|replace("\"","\\\"")|replace('"','\"')}}"
+    "abstract" : "{{item.abstract|replace("\n","\\n")|replace("\r","\\r")|replace("\"","\\\"")|replace('"','"')}}"
   }{% if not loop.last %},{% endif %}
 {% endfor %}
 ],
