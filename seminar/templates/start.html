@@ -257,8 +257,6 @@ Seminar.schedule = (function() {
         dots[p] = 'occupied';
       }
 
-      console.log(schedule);
-      console.log(dots);
       return dots;
     },
     render: function() {
@@ -285,7 +283,6 @@ Seminar.schedule = (function() {
 
         for (var s in sessions[i]) {          
           var item = sessions[i][s];
-          console.log(item.lecture);
 
           item.lecture.dots = 
             init.dots(item.lecture.schedule);
