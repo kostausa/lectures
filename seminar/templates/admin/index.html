@@ -16,9 +16,9 @@
       
       <ul class="nav">
         <li class="active">
-          <a href="#">강의입력</a>
+          <a href="/admin">강의입력</a>
         </li>
-        <li><a href="#">등록자관리</a></li>
+        <li><a href="/admin/members">등록자관리</a></li>
       </ul>
 
     </div>
@@ -305,7 +305,7 @@ Seminar.admin = (function() {
     },
     initialize: function() {
       _.bindAll(this, 'render', 'toggleDesc', 'sendRemove', 
-        'unrender', 'sendUpdate');
+        'unrender', 'sendUpdate', 'dots');
       this.model
         .on('destroy', this.unrender)
         .on('update', this.confirm);
@@ -331,6 +331,22 @@ Seminar.admin = (function() {
     sendRemove: function() {
       this.model.unsync();
       return false;
+    },
+    dots: function(schedule) {
+      var i;
+      var num = (Seminar.context.conf == 0)?5:6;
+      var dots = [];
+      for (i=0;i<num;i++) {
+        dots[i] = 'unoccupied';
+      }
+
+      var slots = schedule.split(/,/);
+      for (var s in slots) {
+        var p = parseInt(slots[s])-1;
+        dots[p] = 'occupied';
+      }
+
+      return dots;
     },
     render: function() {
       var i;
@@ -359,7 +375,7 @@ Seminar.admin = (function() {
             subject: this.model.get('subject'),
             capacity: this.model.get('capacity'),
             bio: this.model.get('bio'),
-            schedule: schedule
+            schedule: this.dots(this.model.get('schedule'))
           }
         )
       );
@@ -507,8 +523,7 @@ Seminar.admin = (function() {
           <div>{{speaker}}</div>
           <div class="blocks">
             {{#schedule}}
-              {{#on}}<img src="/static/img/on.png">{{/on}}
-              {{^on}}<img src="/static/img/off.png">{{/on}}
+              <span class="{{.}}">●</span>
             {{/schedule}}
           </div>
       </div>

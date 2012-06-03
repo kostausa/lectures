@@ -7,6 +7,7 @@ from seminar import app, db
 from flask import Flask, jsonify, request, session, redirect, make_response
 from flask import render_template
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
 
 
 def auth():
@@ -99,10 +100,12 @@ class User(db.Model):
 class Assigned(db.Model):
   sessionid = db.Column(db.Integer, db.ForeignKey('session.id'), primary_key=True)
   userid = db.Column(db.Integer, primary_key=True)
+  conf = db.Column(db.Integer)
 
-  def __init__(self, sessionid, userid):
+  def __init__(self, sessionid, userid, conf):
     self.userid = userid
     self.sessionid = sessionid
+    self.conf = conf
 
   def __repr__(self):
     return '<Assigned %r>' % self.userid
@@ -138,6 +141,15 @@ def unregister():
 
   return jsonify(result=True, slot=slot)
 
+@app.route("/api/status/<conf>")
+def status(conf):
+  status = db.session.query(Assigned.sessionid, func.count(Assigned.userid).label('fill')) \
+    .filter_by(conf=conf) \
+    .group_by(Assigned.sessionid).all()  
+  rs = make_response(render_template('status.html', status=status))
+  rs.headers['Content-type'] = 'application/json'  
+  return rs
+
 @app.route("/api/register", methods=['POST'])
 def register():
   userid = int(request.form['userid'])
@@ -170,7 +182,7 @@ def register():
   if assigned:
     assigned.sessionid = sessionid
   else:
-    assignment = Assigned(sessionid, userid)
+    assignment = Assigned(sessionid, userid, user.conf)
     db.session.add(assignment)
 
   db.session.commit()  
@@ -263,6 +275,11 @@ def update():
 def remove():
   lecture=Lecture.query.filter_by(id=request.form['id']).first()
   db.session.delete(lecture)
+
+  sessions=Session.query.filter_by(lectureid=request.form['id']).all()
+  for onesession in sessions:
+    db.session.delete(onesession)
+  
   db.session.commit()
   return jsonify(result=True)
 
@@ -335,3 +352,13 @@ def admin():
     conf="Chicago"
   return render_template('admin/index.html', conf=conf, chicago=chicago)
 
+@app.route("/admin/members")
+def members():
+  if not auth():
+    return redirect('/admin/login')
+  chicago=False
+  conf="Indianapolis"
+  if session['conf'] == '0':
+    chicago=True
+    conf="Chicago"
+  return render_template('admin/members.html', conf=conf, chicago=chicago)

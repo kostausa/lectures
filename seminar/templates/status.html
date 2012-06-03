@@ -1,0 +1,6 @@
+{
+{% for item in status %}
+  "_{{item.sessionid}}": {{item.fill}}
+  {% if not loop.last %},{% endif %}
+{% endfor %}
+}

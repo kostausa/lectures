@@ -189,8 +189,24 @@ Seminar.schedule = (function() {
     }
   };
 
-
   var init = {
+    data: {
+      "lecture": undefined,
+      "status" : undefined
+    },
+    checkin: function(action, data) {
+      init.data[action] = data;
+
+      if (!(init.data.lecture &&
+            init.data.status)) {
+        return undefined;
+      }
+
+      // all data ready at this point
+      init
+        .load(init.data.lecture)
+        .render();
+    },
     load: function(data) {
       if (!(data && data.lectures && data.sessions)) {
         return undefined;
@@ -225,6 +241,24 @@ Seminar.schedule = (function() {
       }
       return init;
     },
+    dots: function(schedule) {
+      var i;
+      var num = (Seminar.context.conf == 0)?5:6;
+      var dots = [];
+      for (i=0;i<num;i++) {
+        dots[i] = 'unoccupied';
+      }
+
+      var slots = schedule.split(/,/);
+      for (var s in slots) {
+        var p = parseInt(slots[s])-1;
+        dots[p] = 'occupied';
+      }
+
+      console.log(schedule);
+      console.log(dots);
+      return dots;
+    },
     render: function() {
 
       var _t = Hogan.compile(
@@ -247,10 +281,26 @@ Seminar.schedule = (function() {
         }
         var el = $('#schedule'+i);
 
-        for (var s in sessions[i]) {
+        for (var s in sessions[i]) {          
           var item = sessions[i][s];
+          console.log(item.lecture);
+
+          item.lecture.dots = 
+            init.dots(item.lecture.schedule);
+
+          item.lecture.open = true;
+          if (("_" + item.lecture.sessionid) in init.data.status) {
+            var capacity = 1;//item.lecture.capacity;
+            var filled = init.data.status['_'+item.lecture.sessionid];
+            if (filled >= capacity) {
+              item.lecture.open = false; 
+              // just client-side check
+              // backend does more proper check when button is pressed.
+            }
+          }
+
           var source = {
-            lecture: item.lecture
+            "lecture": item.lecture
           };
 
           $(el).append(
@@ -267,9 +317,15 @@ Seminar.schedule = (function() {
       });
 
       $('a.reg').click(function(e) {
+        e.preventDefault();
         var id = $(this).attr('href').substring(1);
         registration.go(id);
       });
+
+      $('a.closed').click(function(e) {
+        e.preventDefault();        
+      });
+
     }
   };
 
@@ -278,11 +334,19 @@ Seminar.schedule = (function() {
       userid = id;
 
       $.ajax({
+        url: '/api/status/{{user.conf}}',
+        success: function(data) {
+          init.checkin('status', data);
+        },
+        error: function(data) {
+          alert('오류가 있었습니다, 브라우저를 Reload 해주세요');
+        }
+      });
+
+      $.ajax({
         url: '/api/lectures/{{user.conf}}',
         success: function(data) {
-          init
-            .load(data)
-            .render();
+          init.checkin('lecture', data);
         },
         error: function(data) {
           alert('오류가 있었습니다, 브라우저를 Reload 해주세요');
@@ -315,13 +379,26 @@ Seminar.schedule = (function() {
     <div class="span9">
       [{{subject}}] {{speaker}}
       <div style="margin-top:2px;">
-        &mdash; <a href="#{{sessionid}}" class="title">{{title}}</a>
+        &mdash; 
+        {{^open}}<s>{{/open}}
+        <a href="#{{sessionid}}" class="title">{{title}}</a>
+        {{^open}}</s>{{/open}}
       </div>
     </div>
     <div class="span3">
+      <div class="dots">
+        {{#dots}}
+          <span class="{{.}}">●</span>
+        {{/dots}}
+      </div>
       <div class="actions pull-right">
         <a href="#{{sessionid}}" class="info btn btn-mini"><i class="icon-search"></i></a>
+        {{#open}}
         <a href="#{{sessionid}}" class="reg btn btn-mini">Register</a>
+        {{/open}}
+        {{^open}}
+        <a href="#{{sessionid}}" class="closed btn btn-mini" disabled="disabled">closed</a>
+        {{/open}}
       </div>
     </div>
   </div>
@@ -358,6 +435,7 @@ Seminar.schedule = (function() {
   </span>
 {% endraw %}      
 </script>
+
 {% endblock %}
 
 {% block setupjs %}

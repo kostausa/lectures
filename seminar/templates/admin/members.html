@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+  <link rel="stylesheet" href="/static/css/seminar.css" type="text/css" />
+  <link rel="stylesheet" href="/static/css/admin.css" type="text/css" />
+{% endblock %}
+
+{% block body %}
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+
+      <a href="#" class="brand">
+        <span class="conf">{{conf}}</span>
+      </a>
+      
+      <ul class="nav">
+        <li>
+          <a href="/admin">강의입력</a>
+        </li>
+        <li class="active">
+          <a href="/admin/members">등록자관리</a>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+<div class="row-fluid" id="admin-container">
+
+</div>
+{% endblock %}
+
+{% block setupjs %}
+Seminar.admin.setup();
+{% endblock %}
