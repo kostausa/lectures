@@ -82,7 +82,7 @@
           <a href="#{{sessions[item].sessionid}}" class="remove"><i class="icon-remove"></i></a>
         </div>
       {% else %}
-      <div class="empty">
+      <div class="empty notyet" id="choose{{sessions[item].slot}}">
         <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
       </div>
       {% endif %}
@@ -276,7 +276,7 @@ Seminar.schedule = (function() {
       for (i=1;i<num;i++) {
         if (Seminar.context.conf == 0 &&
             Seminar.context.track == 'T' &&
-            (i != 2 && i != 3)) {
+            (i != 2 && i != 4)) {
           // themed track
           $('#session'+i).append(_w.render({}));
           continue;
@@ -327,6 +327,13 @@ Seminar.schedule = (function() {
       $('a.closed').click(function(e) {
         e.preventDefault();        
       });
+
+      $('.notyet').click(function(e) {
+        e.preventDefault();        
+        var slot = $(this).attr('id').substring(6);
+        var tabindex = parseInt(slot)-1;
+        $('#lectures a:eq('+tabindex+')').tab('show');
+      });      
 
     }
   };

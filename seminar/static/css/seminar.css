@@ -54,6 +54,7 @@ body {
 }
 
 .empty {
+  cursor:pointer;
   opacity: 0.5;
   -moz-opacity:0.5;
   filter:alpha(opacity=50);

@@ -164,7 +164,7 @@ def register():
 
   slot = targetSession.slot
   user = User.query.filter_by(id=userid).first()
-  if user.conf == 0 and user.track == 'T' and not slot in [2,3]:
+  if user.conf == 0 and user.track == 'T' and not slot in [2,4]:
     return jsonify(result=False, reason='track')
 
   maxpeople = targetSession.lecture.capacity
