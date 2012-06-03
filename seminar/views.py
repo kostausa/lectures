@@ -30,7 +30,7 @@ def sendlink(user,h):
   msg['To'] = user.email
 
   s = smtplib.SMTP('smtp.1and1.com')
-  s.login('web@kosta.us','gkskslaskfk')
+  s.login('web@kosta.us', app.config['SMTPPASS'])
   s.sendmail('webhelp@kostausa.org', [user.email], msg.as_string())
   s.quit()
 

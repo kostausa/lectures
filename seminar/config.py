@@ -6,5 +6,6 @@ app.config.update(
   YEAR=2012,
   SECRET="gkskslaskfk",
   SQLALCHEMY_DATABASE_URI='mysql://web:tiffha@localhost/kosta',
-  ADMINPASS="gkskslaskfk"
+  ADMINPASS="gkskslaskfk",
+  SMTPPASS="gkskslaskfk"
 )
