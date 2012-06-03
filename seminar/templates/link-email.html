@@ -2,11 +2,15 @@
 
 {% block content %}
 
+  안녕하세요 
   {{user.kname}}
-  {{user.gender|replace('M','형제님')|replace('F','자매님')}}께
-  <div style="margin-bottom:15px;font-size:1.2em;color:#28c;">    
+  {{user.gender|replace('M','형제님')|replace('F','자매님')}}, 
+  <div style="margin-bottom:15px;font-size:1.0em;">    
     다음은 2012 KOSTA/USA {{user.conf|replace(1,'인디애나폴리스')|replace(0,'시카고')}} 컨퍼런스 세미나 등록을 위한 링크입니다. 
   </div>
   http://seminar.kostausa.org/open/{{hash}}
+  <div style="margin-top:10px">
+  2012 KOSTA/USA 드립니다
+  </div>
 
 {% endblock %}

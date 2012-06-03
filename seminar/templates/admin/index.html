@@ -176,6 +176,10 @@
 
 <script type="text/javascript">
 
+if (typeof console == "undefined") {
+  var console = { log: function() {} }; 
+}
+
 var Seminar = {};
 Seminar.context = {
   conf: {% if chicago %}0{% else %}1{% endif %}
