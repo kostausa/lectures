@@ -292,7 +292,7 @@ Seminar.schedule = (function() {
 
           item.lecture.open = true;
           if (("_" + item.lecture.sessionid) in init.data.status) {
-            var capacity = item.lecture.capacity;
+            var capacity = 1;item.lecture.capacity;
             var filled = init.data.status['_'+item.lecture.sessionid];
             if (filled >= capacity) {
               item.lecture.open = false; 

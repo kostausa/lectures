@@ -82,12 +82,14 @@
       </div>
     </div>
 
+    <!--
     <div class="control-group">
       <label class="control-label" for="seminar-bio">강사 프로필</label>
       <div class="controls">
         <textarea class="span12" id="seminar-bio" rows="3"></textarea>
       </div>
     </div>
+    -->
 
     <div class="control-group">
       <label class="control-label" for="seminar-capacity">교실인원</label>
@@ -435,7 +437,7 @@ Seminar.admin = (function() {
         $('#seminar-title').val('');
         $('#seminar-speaker').val('');
         $('#seminar-abstract').val('');
-        $('#seminar-bio').val('');
+        //$('#seminar-bio').val('');
         $('#seminar-capacity').val('');
         $('.sessions input:checked').prop('checked', false);
     },
@@ -481,7 +483,7 @@ Seminar.admin = (function() {
         speaker: $('#seminar-speaker').val(),
         abstract: $('#seminar-abstract').val(),
         schedule: schedule,
-        bio: $('#seminar-bio').val(),
+        bio: '', //$('#seminar-bio').val(),
         capacity: parseInt($('#seminar-capacity').val())
       };
     }
