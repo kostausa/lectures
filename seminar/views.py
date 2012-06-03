@@ -264,8 +264,47 @@ def conf():
 
 @app.route("/admin/update", methods=['POST'])
 def update():
+  schedule = request.form['schedule']  
+  if schedule == '':
+    return jsonify(result=False, reason='invalid')
+
   lecture=Lecture.query.filter_by(id=request.form['id']).first()
+  if lecture == None:
+    return jsonify(result=False, reason='invalid')
+
+  drop = []
+  slots = schedule.split(',')
+  original = lecture.schedule.split(',')
+
+  for o in original:
+    if not o in slots:
+      drop.append(o)
+
+  sessions = Session.query.filter_by(lectureid=lecture.id).all()
+  for s in sessions:
+    if str(s.slot) in drop:
+      cc = Assigned.query.filter_by(sessionid=s.id).count()
+      if cc > 0:
+        return jsonify(result=False, reason='present')
+
+  # delete the drop list
+  for s in sessions:
+    if str(s.slot) in drop:
+      db.session.delete(s)
+
+  db.session.commit()
+
+  # good to update now
+  for s in slots:
+    if not s in original:
+      onesession = Session(
+        lecture.id, int(s),
+        0, int(session['conf'])
+      )
+      db.session.add(onesession)
+
   lecture.abstract = request.form['abstract']
+  lecture.schedule = request.form['schedule']
   lecture.bio = request.form['bio']
   db.session.add(lecture)
   db.session.commit()  

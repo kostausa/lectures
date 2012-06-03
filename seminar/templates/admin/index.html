@@ -248,12 +248,32 @@ Seminar.admin = (function() {
         data: {
           id: this.get('id'),
           abstract: this.get('abstract'),
+          schedule: this.get('schedule'),
           bio: this.get('bio')
         },
         success: function(data) {
+          if (!data.result) {
+            switch(data.reason) {
+              case 'invalid':
+                alert('세션을 하나 이상 선택해야 합니다');
+                break;
+
+              case 'present':
+                alert('등록자가 있는 상태에서 세션을 바꿀수 없습니다');
+                break;
+
+              default:
+                alert('오류가 있었습니다');
+                break;
+            }
+            _self.trigger('reset', _self);
+            return false;
+          }
+
           _self.trigger('update', _self);
         },
         error: function(data) {
+          _self.trigger('reset', _self);          
           alert('오류가 있었습니다.');
         }
       });
@@ -311,10 +331,19 @@ Seminar.admin = (function() {
     },
     initialize: function() {
       _.bindAll(this, 'render', 'toggleDesc', 'sendRemove', 
-        'unrender', 'sendUpdate', 'dots');
+        'unrender', 'sendUpdate', 'dots', 'renderDots', 'reset');
+      
+      this.prevSchedule = '';
       this.model
         .on('destroy', this.unrender)
-        .on('update', this.confirm);
+        .on('update', this.confirm)
+        .on('reset', this.reset);
+    },
+    reset: function() {
+      this.renderDots(
+        this.dots(this.prevSchedule)
+      );
+      $('button',this.el).button('reset');
     },
     confirm: function() {
       var _self = this;
@@ -331,6 +360,17 @@ Seminar.admin = (function() {
       $(".description",this.el).toggle();
     },
     sendUpdate: function() {
+      this.prevSchedule = this.model.get('schedule');
+
+      var schedule = '';
+      $('input.slots:checked', this.el).each(function() {
+        if (schedule != '') {
+          schedule += ',';
+        }
+        schedule += $(this).val();
+      });
+
+      this.model.set('schedule', schedule);
       this.model.update();
       return false;
     },
@@ -343,33 +383,33 @@ Seminar.admin = (function() {
       var num = (Seminar.context.conf == 0)?5:6;
       var dots = [];
       for (i=0;i<num;i++) {
-        dots[i] = 'unoccupied';
+        dots[i] = {
+          "index"    : i+1,
+          "className": "unoccupied"
+        }
       }
 
       var slots = schedule.split(/,/);
       for (var s in slots) {
         var p = parseInt(slots[s])-1;
-        dots[p] = 'occupied';
+        dots[p]['className'] = 'occupied';
       }
 
       return dots;
     },
-    render: function() {
-      var i;
-      var schedule = [];
-      for (i=0;i<5+Seminar.context.conf;i++) {
-        schedule[i] = {
-          on: false
-        };
-      }
-
-      var offer = this.model.get('schedule').split(',');
-      for (i in offer) {
-        var index = parseInt(offer[i]) - 1;
-        schedule[index] = {
-          on: true
+    renderDots: function(dots) {
+      for (var d in dots) {
+        var item = dots[d];
+        var occupied = false;
+        if (item.className == 'occupied') {
+          occupied = true;
         }
+        $('input.slots:eq('+d+')', this.el).prop('checked', occupied);
       }
+      return this;
+    },
+    render: function() {
+      var dots = this.dots(this.model.get('schedule'));
 
       $(this.el).html(
         Seminar.template.render(
@@ -381,7 +421,7 @@ Seminar.admin = (function() {
             subject: this.model.get('subject'),
             capacity: this.model.get('capacity'),
             bio: this.model.get('bio'),
-            schedule: this.dots(this.model.get('schedule'))
+            schedule: dots
           }
         )
       );
@@ -392,10 +432,7 @@ Seminar.admin = (function() {
         _self.model.set('abstract', $(e.target).val());
       });
 
-      $('.bio', this.el).change(function(e) {
-        _self.dirty = true;
-        _self.model.set('bio', $(e.target).val());
-      });
+      this.renderDots(dots);
       return this;
     }
   });
@@ -529,15 +566,19 @@ Seminar.admin = (function() {
           <div>{{speaker}}</div>
           <div class="blocks">
             {{#schedule}}
-              <span class="{{.}}">●</span>
+              <span class="{{className}}">●</span>
             {{/schedule}}
           </div>
       </div>
     </div>
 
     <div class="description hide">
+      Sessions
+      {{#schedule}}
+      <input type="checkbox" class="slots" value="{{index}}">
+      {{/schedule}}
+
       <textarea class="abstract">{{{abstract}}}</textarea>
-      <textarea class="bio">{{bio}}</textarea>      
       <button class="btn btn-success pull-right" data-loading-text="Saving..." data-complete-text="Saved!">Update</button>
     </div>
 
