@@ -84,6 +84,10 @@ ul.session  {
   cursor:pointer;
 }
 
+#lectures li a {
+  font-size:1.2em;
+}
+
 .abstract {
   padding:10px;
 }
