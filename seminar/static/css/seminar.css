@@ -124,3 +124,13 @@ ul.session  {
   color:#ddd;
 }
 
+.group-header {
+  font-size:1.4em;
+  color:#c33;
+  margin-top:0px;
+  margin-bottom:5px;
+}
+
+.gap {
+  margin-top:25px;
+}

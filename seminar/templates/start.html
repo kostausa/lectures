@@ -227,7 +227,7 @@ Seminar.schedule = (function() {
           continue;
         }
 
-        // client side join, yeah
+        // client side join, yeah!
         var slot = item.slot;
         item.lecture = $.extend({},lectures[item.lectureid]);
         item.lecture.sessionid = item.id;
@@ -237,11 +237,60 @@ Seminar.schedule = (function() {
         item.lecture.abstract = paragraphs;
 
         if (!(slot in sessions)) {
-          sessions[slot] = [];
+          sessions[slot] = {};
         }
-        sessions[slot].push(item);
+
+        var group = item.lecture.grouping;
+        if (!(group in sessions[slot])) {
+          sessions[slot][group] = [];
+        }
+        sessions[slot][group].push(item);
       }
       return init;
+    },
+    groupname: function(grouping) {
+      var name = "";
+      if (Seminar.context.conf == 1) {
+
+        switch (grouping) {
+          case '0':
+            name = 'KOSTA Thinkers';
+            name += " <span class=\"label label-important\">pilot project</span>";
+            break;
+
+          case '1':
+            name = '토픽별 (Topic)';
+            break;
+
+          case '2':
+          default:
+            name = '상황별 (Context)';
+            break;
+        }
+
+      } else {
+
+        switch (grouping) {
+          case '0':
+            name = '기초과목별 (Core)';
+            break;
+
+          case '1':
+            name = '상황별 (Context)';
+            break;
+
+          case '2':
+            name = '관심별 (Concentration)';
+            break;
+
+          case '3':
+          default:
+            name = '전문인 그리스도인 (TM)';
+            break;
+        }
+      }
+
+      return name;
     },
     dots: function(schedule) {
       var i;
@@ -261,16 +310,13 @@ Seminar.schedule = (function() {
     },
     render: function() {
 
-      var _t = Hogan.compile(
-        $('#_template-lecture').text()
-      );
-
-      var _w = Hogan.compile(
-        $('#_template-trackwarn').text()
-      );
+      var _t = Hogan.compile($('#_template-lecture').text());
+      var _w = Hogan.compile($('#_template-trackwarn').text());
+      var _g = Hogan.compile($('#_template-grouping').text());
 
       var i;
       var num = (Seminar.context.conf == 0)?6:7;
+
       for (i=1;i<num;i++) {
         if (Seminar.context.conf == 0 &&
             Seminar.context.track == 'T' &&
@@ -281,30 +327,46 @@ Seminar.schedule = (function() {
         }
         var el = $('#schedule'+i);
 
-        for (var s in sessions[i]) {          
-          var item = sessions[i][s];
-
-          item.lecture.dots = 
-            init.dots(item.lecture.schedule);
-
-          item.lecture.open = true;
-          if (("_" + item.lecture.sessionid) in init.data.status) {
-            var capacity = item.lecture.capacity;
-            var filled = init.data.status['_'+item.lecture.sessionid];
-            if (filled >= capacity) {
-              item.lecture.open = false; 
-              // just client-side check
-              // backend does more proper check when button is pressed.
-            }
-          }
-
-          var source = {
-            "lecture": item.lecture
-          };
+        var gap = false;
+        for (var group in sessions[i]) {
 
           $(el).append(
-            _t.render(source)
+            _g.render({
+              "grouping": init.groupname(group),
+              "gap" : gap
+            })
           );
+          
+          if (!gap) {
+            gap = true;
+          }
+
+          for (var s in sessions[i][group]) {          
+            var item = sessions[i][group][s];
+
+            item.lecture.dots = 
+              init.dots(item.lecture.schedule);
+
+            item.lecture.open = true;
+            if (("_" + item.lecture.sessionid) in init.data.status) {
+              var capacity = item.lecture.capacity;
+              var filled = init.data.status['_'+item.lecture.sessionid];
+              if (filled >= capacity) {
+                item.lecture.open = false; 
+                // just client-side check
+                // backend does more proper check when button is pressed.
+              }
+            }
+
+            var source = {
+              "lecture": item.lecture
+            };
+
+            $(el).append(
+              _t.render(source)
+            );
+
+          }
 
         }
       }
@@ -431,6 +493,14 @@ Seminar.schedule = (function() {
   <div class="empty">
     <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
   </div>
+{% endraw %}
+</script>
+
+<script type="text/html" id="_template-grouping">
+{% raw %}
+<div class="group-header{{#gap}} gap{{/gap}}">
+{{{grouping}}}
+</div>
 {% endraw %}
 </script>
 

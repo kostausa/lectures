@@ -113,8 +113,10 @@ class Assigned(db.Model):
 # API Section
 @app.route("/api/lectures/<conf>")
 def lectures(conf):
-  lectures = Lecture.query.filter_by(conf=conf).all()
-  sessions = Session.query.filter_by(conf=conf).all()
+  lectures = Lecture.query \
+    .filter_by(conf=conf).all()
+  sessions = Session.query \
+    .filter_by(conf=conf).all()
   rs = make_response(render_template('lectures.html', 
     lectures=lectures, sessions=sessions))
   rs.headers['Content-type'] = 'application/json'  
