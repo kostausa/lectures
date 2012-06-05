@@ -52,7 +52,7 @@
 <div class="hd">선택식 세미나 Schedule</div>
 <div class="user">
   <i class="icon-home"></i>
-  {{user.kname}} | {{user.gender}} | {{user.email}}
+  {{user.kname}} | {{user.gender}} | {{user.email | replace('__manual__','')}}
   {{user.track | replace('T','| 주제심화트랙') | replace('N','')}}
 </div>
 
