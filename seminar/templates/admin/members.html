@@ -11,7 +11,7 @@
     <div class="container-fluid">
 
       <a href="#" class="brand">
-        <span class="conf">{{conf}}</span>
+        <span class="conf">{{confname}}</span>
       </a>
       
       <ul class="nav">
@@ -28,8 +28,111 @@
 </div>
 
 <div class="row-fluid" id="admin-container">
+<div class="span12" style="margin-top:10px;">
+
+<form class="well form-inline span12">
+  <input type="text" class="input-small" id="name" placeholder="이름">
+  <select id="gender" style="width:70px;">
+    <option value="M" selected>M</option>
+    <option value="F">F</option>
+  </select>
+  <select id="track" style="width:100px;">
+    <option value="N" selected>일반트랙</option>
+    <option value="T">주제트랙</option>
+  </select>    
+  <input type="text" id="optional" placeholder="Optional ID" class="input-small">
+  <button type="submit" class="btn btn-success" data-loading="전송중 ...">참가자 더하기</button>
+</form>
 
 </div>
+<div id="manual">
+  <div style="margin-bottom:10px;">추가 등록자 리스트</div>
+</div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block js %}
+<script type="text/javascript">
+var Seminar = {};
+Seminar.admin = (function() {
+
+  var manual = {
+    "list": function() {
+      var _m = Hogan.compile($('#_template-member').text());
+
+      $.ajax({
+        url: '/admin/member/list',
+        success: function(data) {
+          for (var i in data.members) {
+            $('#manual').append(
+              _m.render(data.members[i])
+            );
+          }
+        }
+      });
+
+    }
+  };
+
+  var user = {
+    "add" : function() {
+
+      if ($('#name').val().length < 1) {
+        alert('이름을 입력해 주세요');
+        return;
+      }
+
+      $.ajax({
+        type: 'POST',
+        url: '/admin/member/create',
+        data: {
+          name: $('#name').val(),
+          gender: $('#gender').val(),
+          track: $('#track').val(),
+          optional: $('#optional').val(),
+          conf: {{conf}}
+        },
+        success: function(data) {
+          var _m = Hogan.compile($('#_template-member').text());
+          $('#manual').append(
+            _m.render(data)
+          );
+        },
+        error: function(data) {
+          alert('오류가 있었습니다');
+        }
+      });      
+
+      return false;
+    }
+  };
+
+  return {
+    "setup": function() {
+      manual.list();
+      $('button[type=submit]').click(function(e) {
+        e.preventDefault();
+        user.add();
+      });
+    }
+  }
+})();
+</script>
+<script type="text/html" id="_template-member">
+{% raw %}
+
+<div>
+  {{name}} | {{gender}} | {{track}} | {{optional}}
+  <a href="/open/{{secret}}">http://seminar.kostausa.org/open/{{secret}}</a>
+</div>
+
+{% endraw %}
+</script>
+
 {% endblock %}
 
 {% block setupjs %}

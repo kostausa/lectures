@@ -89,10 +89,16 @@ class User(db.Model):
   secret = db.Column(db.String(255), unique=True)
   track = db.Column(db.String(4), unique=False)
   conf = db.Column(db.Integer)
+  optional_id = db.Column(db.Integer)
 
-  def __init__(self, kname, email):
+  def __init__(self, kname, email, gender, secret, track, conf, optional_id):
     self.kname = kname
     self.email = email
+    self.gender = gender
+    self.secret = secret
+    self.track = track
+    self.conf = conf
+    self.optional_id = optional_id
 
   def __repr__(self):
     return ''   
@@ -393,6 +399,51 @@ def admin():
     conf="Chicago"
   return render_template('admin/index.html', conf=conf, chicago=chicago)
 
+@app.route("/admin/member/list")
+def listmember():
+  members=User.query \
+    .filter_by(conf=int(session['conf'])) \
+    .filter_by(email='__manual__') \
+    .all()
+  rs = make_response(render_template('admin/listmembers.html',members=members))
+  rs.headers['Content-type'] = 'application/json'
+  return rs
+
+@app.route("/admin/member/create", methods=['POST'])
+def newmember():
+  if not auth():
+    return redirect('/admin/login')  
+  name = request.form['name']
+  conf = request.form['conf']
+  gender = request.form['gender']
+  track = request.form['track']
+  try:
+    optional = int(request.form['optional'])
+  except Exception as e:
+    optional = 0
+
+  member = User(name, '__manual__', gender, '', track, int(conf), optional)
+  db.session.add(member)
+  db.session.commit()
+
+  # compute hash and resave
+  m = hashlib.md5()
+  m.update(str(member.id))
+  m.update(app.config['SECRET'])
+  h = m.hexdigest()
+
+  member.secret=h
+  db.session.add(member)
+  db.session.commit()
+
+  return jsonify(result=True, 
+    gender=member.gender,
+    name=member.kname,
+    track=member.track,
+    optional=member.optional_id,
+    secret=member.secret
+  )
+
 @app.route("/admin/members")
 def members():
   if not auth():
@@ -402,4 +453,5 @@ def members():
   if session['conf'] == '0':
     chicago=True
     conf="Chicago"
-  return render_template('admin/members.html', conf=conf, chicago=chicago)
+  return render_template('admin/members.html', 
+    conf=session['conf'], confname=conf, chicago=chicago)
