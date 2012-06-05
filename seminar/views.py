@@ -466,5 +466,5 @@ def capacity():
     chicago=True
     conf="Chicago"
   return render_template('admin/capacity.html', 
-    conf=session['conf'], confname=conf, chicago=chicago)
+    conf=int(session['conf']), confname=conf, chicago=chicago)
 
