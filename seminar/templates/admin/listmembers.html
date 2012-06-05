@@ -1,0 +1,15 @@
+{
+"members":
+[
+{% for item in members %}
+  {
+    "id": {{item.id}},
+    "name": "{{item.kname}}",
+    "gender": "{{item.gender}}",
+    "track": "{{item.track}}",
+    "secret": "{{item.secret}}",
+    "optional": {{item.optional_id}}    
+  }{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+}
