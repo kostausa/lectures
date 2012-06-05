@@ -30,7 +30,7 @@
   <div id="capacity">
   <ul class="nav nav-tabs" id="caplist">
 
-    {% if conf == 0 %}
+    {% if conf is even %}
 
     <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
     <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
@@ -68,7 +68,7 @@
       <ul class="session" id="schedule5"></ul>
     </div>  
 
-    {% if conf == 1 %}
+    {% if conf is odd %}
     <div class="tab-pane" id="session6">
       <ul class="session" id="schedule6"></ul>
     </div>  
