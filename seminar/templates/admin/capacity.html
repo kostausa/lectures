@@ -1,0 +1,384 @@
+{% extends 'layout.html' %}
+
+{% block css %}
+  <link rel="stylesheet" href="/static/css/seminar.css" type="text/css" />
+  <link rel="stylesheet" href="/static/css/admin.css" type="text/css" />
+{% endblock %}
+
+{% block body %}
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+
+      <a href="#" class="brand">
+        <span class="conf">{{confname}}</span>
+      </a>
+      
+      <ul class="nav">
+        <li>
+          <a href="/admin">강의입력</a>
+        </li>
+        <li><a href="/admin/members">등록자관리</a></li>
+        <li class="active"><a href="/admin/capacity">등록현황</a></li>
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+<div class="row-fluid" id="admin-container">
+  <div id="capacity">
+  <ul class="nav nav-tabs" id="caplist">
+
+    {% if conf == 0 %}
+
+    <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
+    <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
+    <li><a href="#session3" data-toggle="tab">수요일 </a></li>
+    <li><a href="#session4" data-toggle="tab">목요일 1</a></li>
+    <li><a href="#session5" data-toggle="tab">목요일 2</a></li>
+
+    {% else %}
+
+    <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
+    <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
+    <li><a href="#session3" data-toggle="tab">수요일 1</a></li>
+    <li><a href="#session4" data-toggle="tab">수요일 2</a></li>
+    <li><a href="#session5" data-toggle="tab">목요일 1</a></li>
+    <li><a href="#session6" data-toggle="tab">목요일 2</a></li>
+
+    {% endif %}
+
+  </ul>
+  <div class="tab-content" style="width:60%">
+
+    <div class="tab-pane active" id="session1">
+      <ul class="session" id="schedule1"></ul>
+    </div>  
+    <div class="tab-pane" id="session2">
+      <ul class="session" id="schedule2"></ul>
+    </div>  
+    <div class="tab-pane" id="session3">
+      <ul class="session" id="schedule3"></ul>
+    </div>  
+    <div class="tab-pane" id="session4">
+      <ul class="session" id="schedule4"></ul>
+    </div>  
+    <div class="tab-pane" id="session5">
+      <ul class="session" id="schedule5"></ul>
+    </div>  
+
+    {% if conf == 1 %}
+    <div class="tab-pane" id="session6">
+      <ul class="session" id="schedule6"></ul>
+    </div>  
+    {% endif %}
+
+  </div>
+
+</div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+var Seminar = {};
+
+Seminar.context = {
+  conf: {{conf}}
+};
+
+Seminar.capacity = (function() {
+
+  var lectures = {};
+  var sessions = {};
+
+  var init = {
+    data: {
+      "lecture": undefined,
+      "status" : undefined
+    },
+    checkin: function(action, data) {
+      init.data[action] = data;
+
+      if (!(init.data.lecture &&
+            init.data.status)) {
+        return undefined;
+      }
+
+      // all data ready at this point
+      init
+        .load(init.data.lecture)
+        .render();
+    },
+    load: function(data) {
+      if (!(data && data.lectures && data.sessions)) {
+        return undefined;
+      }
+
+      for (var i in data.lectures) {
+        var item = data.lectures[i];
+        lectures[item.id] = item;
+      }
+
+      for (var i in data.sessions) {
+        var item = data.sessions[i];
+        if (item.state != 0 ||
+            !(item.lectureid in lectures)) {
+          // not offered
+          continue;
+        }
+
+        // client side join, yeah!
+        var slot = item.slot;
+        item.lecture = $.extend({},lectures[item.lectureid]);
+        item.lecture.sessionid = item.id;
+        item.lecture.slot = item.slot;
+
+        var paragraphs = item.lecture.abstract.split(/\n/);
+        item.lecture.abstract = paragraphs;
+
+        if (!(slot in sessions)) {
+          sessions[slot] = {};
+        }
+
+        var group = item.lecture.grouping;
+        if (!(group in sessions[slot])) {
+          sessions[slot][group] = [];
+        }
+        sessions[slot][group].push(item);
+      }
+      return init;
+    },
+    dots: function(schedule) {
+      var i;
+      var num = (Seminar.context.conf == 0)?5:6;
+      var dots = [];
+      for (i=0;i<num;i++) {
+        dots[i] = 'unoccupied';
+      }
+
+      var slots = schedule.split(/,/);
+      for (var s in slots) {
+        var p = parseInt(slots[s])-1;
+        dots[p] = 'occupied';
+      }
+
+      return dots;
+    },
+    render: function() {
+
+      var _t = Hogan.compile($('#_template-lecture').text());
+      var _w = Hogan.compile($('#_template-trackwarn').text());
+      var _g = Hogan.compile($('#_template-grouping').text());
+
+      var i;
+      var num = (Seminar.context.conf == 0)?6:7;
+
+      for (i=1;i<num;i++) {
+        if (Seminar.context.conf == 0 &&
+            Seminar.context.track == 'T' &&
+            (i != 2 && i != 4)) {
+          // themed track
+          $('#session'+i).append(_w.render({}));
+          continue;
+        }
+        var el = $('#schedule'+i);
+
+        var gap = false;
+        for (var group in sessions[i]) {
+
+          $(el).append(
+            _g.render({
+              "grouping": init.groupname(group),
+              "gap" : gap
+            })
+          );
+          
+          if (!gap) {
+            gap = true;
+          }
+
+          for (var s in sessions[i][group]) {          
+            var item = sessions[i][group][s];
+
+            item.lecture.dots = 
+              init.dots(item.lecture.schedule);
+
+            item.lecture.open = true;
+            item.lecture.fill = 0;            
+            if (("_" + item.lecture.sessionid) in init.data.status) {              
+              var capacity = item.lecture.capacity;              
+              var filled = init.data.status['_'+item.lecture.sessionid];
+              item.lecture.fill = filled;
+              if (filled >= capacity) {
+                item.lecture.open = false; 
+                // just client-side check
+                // backend does more proper check when button is pressed.
+              }
+            }
+
+            var source = {
+              "lecture": item.lecture
+            };
+
+            $(el).append(
+              _t.render(source)
+            );
+
+          }
+
+        }
+      }
+    },
+    groupname: function(grouping) {      
+      var name = "";
+      if (Seminar.context.conf == 1) {        
+        switch (grouping) {
+          case '0':
+            name = 'KOSTA Thinkers';
+            name += " <span class=\"label label-important\">pilot project</span>";
+            break;
+
+          case '1':
+            name = '토픽별 (Topic)';
+            break;
+
+          case '2':
+            name = '상황별 (Context)';
+            break;
+
+          case '3':
+          default:
+            name = '그룹상담';
+            break;
+        }
+
+      } else {
+
+        switch (grouping) {
+          case '0':
+            name = '기초과목별 (Core)';
+            break;
+
+          case '1':
+            name = '상황별 (Context)';
+            break;
+
+          case '2':
+            name = '관심별 (Concentration)';
+            break;
+
+          case '3':
+          default:
+            name = '전문인 그리스도인 (TM)';
+            break;
+        }
+      }
+      return name;          
+    }  
+  };
+
+  return {
+    "setup": function() {
+
+      $.ajax({
+        url: '/api/status/{{conf}}',
+        success: function(data) {
+          init.checkin('status', data);
+        },
+        error: function(data) {
+          alert('오류가 있었습니다, 브라우저를 Reload 해주세요');
+        }
+      });
+
+      $.ajax({
+        url: '/api/lectures/{{conf}}',
+        success: function(data) {
+          init.checkin('lecture', data);
+        },
+        error: function(data) {
+          alert('오류가 있었습니다, 브라우저를 Reload 해주세요');
+        }
+      });
+
+      $('a.title').click(function(e) {
+        e.preventDefault();
+      });
+
+      $('#caplist a:first').tab('show');
+
+    }
+  }
+})();
+</script>
+<!-- hogan.js to the rescue -->
+<script type="text/html" id="_template-lecture">
+{% raw %}
+{{#lecture}}
+<li class="lecture">
+  <div class="row-fluid">
+    <div class="span9">
+      [{{subject}}] {{speaker}}
+      <div style="margin-top:2px;">
+        &mdash; 
+        {{^open}}<s>{{/open}}
+        <a href="#{{sessionid}}" class="title">{{{title}}}</a>
+        {{^open}}</s>{{/open}}
+      </div>
+    </div>
+    <div class="span3">
+      <div class="actions pull-right">
+        {{#open}}
+          <span class="fill">
+            {{fill}} / {{capacity}}
+          </span>
+        {{/open}}
+        {{^open}}
+          <span class="fill">
+            Closed
+          </span>
+        {{/open}}
+      </div>
+    </div>
+  </div>
+</li>
+{{/lecture}}
+{% endraw %}
+</script>
+
+<script type="text/html" id="_template-trackwarn">
+<div class="empty">
+주제심화트랙 시간입니다.
+</div>
+</script>
+
+<script type="text/html" id="_template-empty">
+{% raw %}
+  <div class="empty">
+    <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
+  </div>
+{% endraw %}
+</script>
+
+<script type="text/html" id="_template-grouping">
+{% raw %}
+<div class="group-header{{#gap}} gap{{/gap}}">
+{{{grouping}}}
+</div>
+{% endraw %}
+</script>
+
+<script type="text/html" id="_template-remove">
+{% raw %}
+  <span class="pull-right xholder">
+    <a href="#{{sessionid}}" class="remove"><i class="icon-remove"></i></a>
+  </span>
+{% endraw %}      
+</script>
+
+{% endblock %}
+
+{% block setupjs %}
+Seminar.capacity.setup();
+{% endblock %}

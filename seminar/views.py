@@ -455,3 +455,16 @@ def members():
     conf="Chicago"
   return render_template('admin/members.html', 
     conf=session['conf'], confname=conf, chicago=chicago)
+
+@app.route("/admin/capacity")
+def capacity():
+  if not auth():
+    return redirect('/admin/login')
+  chicago=False
+  conf="Indianapolis"
+  if session['conf'] == '0':
+    chicago=True
+    conf="Chicago"
+  return render_template('admin/capacity.html', 
+    conf=session['conf'], confname=conf, chicago=chicago)
+

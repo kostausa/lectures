@@ -52,3 +52,16 @@ a.brand .conf {
 #manual {
   padding-left:30px;
 }
+
+#capacity {
+  margin-top:20px;
+  margin-left:20px;
+}
+
+.fill {
+  padding-top:5px;
+  color:#ccc;
+  font-weight:bold;
+  font-family:helvetica;
+  font-size:2.0em;
+}
