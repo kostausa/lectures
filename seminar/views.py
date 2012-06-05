@@ -419,7 +419,7 @@ def newmember():
   track = request.form['track']
   try:
     optional = int(request.form['optional'])
-  except Exception as e:
+  except Exception:
     optional = 0
 
   member = User(name, '__manual__', gender, '', track, int(conf), optional)
