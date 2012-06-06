@@ -1,0 +1,15 @@
+{
+    "result": true,
+    "members":
+    [
+    {% for m in members %}
+      {
+        "id": {{m.id}},
+        "name": "{{m.kname}}",
+        "email" : "{{m.email}}",
+        "secret": "{{m.secret}}",
+        "gender": "{{m.gender}}"
+      }{% if not loop.last %},{% endif %}
+    {% endfor %}
+]
+}

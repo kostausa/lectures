@@ -42,14 +42,19 @@
     <option value="T">주제트랙</option>
   </select>    
   <input type="text" id="optional" placeholder="Optional ID" class="input-small">
-  <button type="submit" class="btn btn-success" data-loading="전송중 ...">참가자 더하기</button>
+  <button type="submit" class="add btn btn-success" data-loading="전송중 ...">참가자 더하기</button>
+  <input type="text" id="search" placeholder="Search">
+  <button type="button" class="search btn btn-info" data-loading="검색중 ...">찾기</button>
 </form>
 
 </div>
+
+<div id="searchresult" class="well">
+</div>
+
 <div id="manual">
   <div style="margin-bottom:10px;">추가 등록자 리스트</div>
 </div>
-
 </div>
 
 
@@ -109,15 +114,47 @@ Seminar.admin = (function() {
       });      
 
       return false;
+    },
+    "search": function() {
+      var term = $('#search').val();
+      $.ajax({
+        type: 'POST',
+        url: '/admin/members/search',
+        data: {
+          "term": term
+        },
+        success: function(data) {
+          if (data && data.result) {
+
+            for (var i in data.members) {
+              var item = data.members[i];
+              if (item.email) {
+                item.email = item.email.replace('__manual__', '추가등록');
+              }
+            }
+            var _s = Hogan.compile($('#_template-searchresult').text());
+            $('#searchresult').html(_s.render(data));
+
+          }
+        },
+        error: function(data) {
+          alert('오류가 있었습니다');
+        }
+
+      });
     }
   };
 
   return {
     "setup": function() {
       manual.list();
-      $('button[type=submit]').click(function(e) {
+      $('button.add').click(function(e) {
         e.preventDefault();
         user.add();
+      });
+      $('button.search').click(function(e) {
+        e.preventDefault();
+        user.search();
       });
     }
   }
@@ -130,6 +167,18 @@ Seminar.admin = (function() {
   {{name}} | {{gender}} | {{track}} | {{optional}}
   <a href="/open/{{secret}}">http://seminar.kostausa.org/open/{{secret}}</a>
 </div>
+
+{% endraw %}
+</script>
+
+<script type="text/html" id="_template-searchresult">
+{% raw %}
+<i class="icon-search"></i> <strong>검색결과</strong>
+{{#members}}
+  <div>
+    {{name}} | {{email}} | {{gender}} | {{track}} | <a href="/open/{{secret}}">http://seminar.kostausa.org/open/{{secret}}</a>
+  </div>
+{{/members}}
 
 {% endraw %}
 </script>

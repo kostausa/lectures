@@ -444,6 +444,18 @@ def newmember():
     secret=member.secret
   )
 
+@app.route("/admin/members/search", methods=['POST'])
+def searchmember():
+  members = User.query.filter_by(conf=session['conf']).filter_by(email=request.form['term']).all()
+  if len(members) == 0:
+    members = User.query.filter_by(conf=session['conf']).filter_by(kname=request.form['term']).all()
+    if len(members) == 0:
+      return jsonify(result=False)
+
+  rs = make_response(render_template('admin/search.html',members=members))
+  rs.headers['Content-type'] = 'application/json'
+  return rs
+
 @app.route("/admin/members")
 def members():
   if not auth():
