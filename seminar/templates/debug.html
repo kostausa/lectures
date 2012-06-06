@@ -146,7 +146,7 @@ Seminar.schedule = (function() {
           var el = $('#slot'+data.slot);
       
           $('.speaker',el).html('');
-          $('.content',el).html($('#_template-empty').text());
+          $('.content',el).html($('#_template-empty').html());
         },
         error: function(data) {
           alert("오류가 있었습니다");
@@ -171,7 +171,7 @@ Seminar.schedule = (function() {
           }
 
           var el = $('#slot'+data.slot);
-          var _x = Hogan.compile($('#_template-remove').text());
+          var _x = Hogan.compile($('#_template-remove').html());
 
           $(el).animate({ backgroundColor: '#fffacd' }, 500);
           setTimeout(function() {
@@ -324,9 +324,9 @@ Seminar.schedule = (function() {
     },
     render: function() {
 
-      var _t = Hogan.compile($('#_template-lecture').text());
-      var _w = Hogan.compile($('#_template-trackwarn').text());
-      var _g = Hogan.compile($('#_template-grouping').text());
+      var _t = Hogan.compile($('#_template-lecture').html());
+      var _w = Hogan.compile($('#_template-trackwarn').html());
+      var _g = Hogan.compile($('#_template-grouping').html());
 
       var i;
       var num = (Seminar.context.conf == 0)?6:7;

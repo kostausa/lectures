@@ -233,7 +233,7 @@ def begin(hash):
     return render_template('start.html', user=user, sessions=personal)
 
 @app.route("/debug/<hash>")
-def begin(hash):
+def debug(hash):
   user = User.query.filter_by(secret=hash).first()
   if user is None:
     return make_response(render_template('notfound.html'), 404)
