@@ -65,6 +65,8 @@ ul.session  {
   list-style:none;
   list-style-position:inside;
   margin-left:0px;
+  padding-right:10px;
+  overflow:hidden;
 }
 
 .lecture {
@@ -92,16 +94,11 @@ ul.session  {
   padding:10px;
 }
 
-.xholder {
-  margin-left:30px;
+.right {
   text-align:right;
-  opacity: 0.5;
-  -moz-opacity:0.5;
-  filter:alpha(opacity=50);
-  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"    
 }
 
-.xholder a {
+.right a {
   text-decoration:none;
   cursor:pointer;
 }
@@ -138,3 +135,4 @@ ul.session  {
 .footnote {
   margin-top:30px;
 }
+

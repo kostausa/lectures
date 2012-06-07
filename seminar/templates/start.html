@@ -59,7 +59,7 @@
 
 <div class="tickets">
 {% for item in sessions %}
- <div class="oneticket" id="slot{{sessions[item].slot}}">
+ <div class="oneticket" id="slot{{sessions[item].slot}}" style="background-color:#fff;">
     <div>
       <span class="time">{{sessions[item].description}}</span>
       <span class="speaker">
@@ -76,14 +76,22 @@
     {% else %}
 
       {% if sessions[item].assigned != None %}
-        [ {{ sessions[item].assigned.subject }} ]
-        {{ sessions[item].assigned.title }} 
-        <div class="pull-right xholder">
-          <a href="#{{sessions[item].sessionid}}" class="remove"><i class="icon-remove"></i></a>
+      <div class="row-fluid">
+        <div class="span11">      
+          [ {{ sessions[item].assigned.subject }} ]
+          {{ sessions[item].assigned.title }} 
         </div>
+        <div class="span1 right">
+          <a href="#{{sessions[item].sessionid}}" class="remove"><img src="/static/img/x.png" alt="remove"></a>
+        </div>
+      </div>
       {% else %}
-      <div class="empty notyet" id="choose{{sessions[item].slot}}">
-        <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
+      <div class="row-fluid">
+        <div class="span12">
+          <div class="empty notyet" id="choose{{sessions[item].slot}}">
+            <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
+          </div>
+        </div>
       </div>
       {% endif %}
 
@@ -99,14 +107,6 @@
   <li>모든 세미나 등록은 선착순입니다. </li>
   <li>세미나 관련 질문은 webhelp@kostausa.org 로 해주시길 바랍니다</li>
   <li><a href="/static/files/2012-seminar-schedule.pdf">PDF 파일로 시간표 보기</a></li>
-  <li>현재 Internet Explorer 7,8 에서 강의가 보이지 않는 버그가 있어서 고치고 있는 중입니다. 강의리스트가 뜨지 않을 경우, Firefox, Chrome, Safari 등의 다른 브라우저를 사용해 주시길 바랍니다</li>
-</ul>
-</div>
-{% else %}
-<div class="footnote well">
-<ul>
-  <li>모든 세미나 등록은 선착순입니다. </li>
-  <li>현재 Internet Explorer 7,8 에서 강의가 보이지 않는 버그가 있어서 고치고 있는 중입니다. 강의리스트가 뜨지 않을 경우, Firefox, Chrome, Safari 등의 다른 브라우저를 사용해 주시길 바랍니다</li>
 </ul>
 </div>
 {% endif %}
@@ -154,7 +154,7 @@ Seminar.schedule = (function() {
           var el = $('#slot'+data.slot);
       
           $('.speaker',el).html('');
-          $('.content',el).html($('#_template-empty').text());
+          $('.content',el).html($('#_template-empty').html());
         },
         error: function(data) {
           alert("오류가 있었습니다");
@@ -179,7 +179,7 @@ Seminar.schedule = (function() {
           }
 
           var el = $('#slot'+data.slot);
-          var _x = Hogan.compile($('#_template-remove').text());
+          var _o = Hogan.compile($('#_template-oneticket').html());
 
           $(el).animate({ backgroundColor: '#fffacd' }, 500);
           setTimeout(function() {
@@ -188,8 +188,11 @@ Seminar.schedule = (function() {
 
           $('.speaker',el).html(data.speaker);
           $('.content',el).html(
-            '[ '+data.subject+' ] ' + data.title +
-            _x.render({ sessionid: id })
+            _o.render({
+              sessionid: id,
+              subject: data.subject,
+              title: data.title
+            })
           );
         },
         error: function(data) {
@@ -332,9 +335,9 @@ Seminar.schedule = (function() {
     },
     render: function() {
 
-      var _t = Hogan.compile($('#_template-lecture').text());
-      var _w = Hogan.compile($('#_template-trackwarn').text());
-      var _g = Hogan.compile($('#_template-grouping').text());
+      var _t = Hogan.compile($('#_template-lecture').html());
+      var _w = Hogan.compile($('#_template-trackwarn').html());
+      var _g = Hogan.compile($('#_template-grouping').html());
 
       var i;
       var num = (Seminar.context.conf == 0)?6:7;
@@ -395,14 +398,14 @@ Seminar.schedule = (function() {
 
       $('a.title, a.info').click(function(e) {
         e.preventDefault();
-        var id = $(this).attr('href').substring(1);
-        $('.ab'+id).toggle();
+        var ids = $(this).attr('href').split('#');
+        $('.ab'+ids[1]).toggle();
       });
 
       $('a.reg').click(function(e) {
         e.preventDefault();
-        var id = $(this).attr('href').substring(1);
-        registration.go(id);
+        var ids = $(this).attr('href').split('#');
+        registration.go(ids[1]);
       });
 
       $('a.closed').click(function(e) {
@@ -445,8 +448,8 @@ Seminar.schedule = (function() {
 
       $('.tickets').on('click','a.remove', function(e) {
         e.preventDefault();
-        var id = $(this).attr('href').substring(1);
-        ticket.remove(id);
+        var ids = $(this).attr('href').split('#');
+        ticket.remove(ids[1]);
       });
 
       if (Seminar.context.track == 'T') {
@@ -454,6 +457,7 @@ Seminar.schedule = (function() {
       } else {
         $('#lectures a:first').tab('show');
       }
+
     }
   }
 
@@ -512,9 +516,13 @@ Seminar.schedule = (function() {
 
 <script type="text/html" id="_template-empty">
 {% raw %}
-  <div class="empty">
-    <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
+<div class="row-fluid">
+  <div class="span12">
+    <div class="empty notyet" id="choose{{sessions[item].slot}}">
+      <i class="icon-chevron-right"></i> <i>아직 선택된 강의가 없습니다</i>
+    </div>
   </div>
+</div>
 {% endraw %}
 </script>
 
@@ -526,11 +534,18 @@ Seminar.schedule = (function() {
 {% endraw %}
 </script>
 
-<script type="text/html" id="_template-remove">
+<script type="text/html" id="_template-oneticket">
 {% raw %}
-  <span class="pull-right xholder">
-    <a href="#{{sessionid}}" class="remove"><i class="icon-remove"></i></a>
-  </span>
+
+<div class="row-fluid">
+  <div class="span11">      
+    [ {{subject}} ] {{title}}    
+  </div>
+  <div class="span1 right">
+    <a href="#{{sessionid}}" class="remove"><img src="/static/img/x.png" alt="remove"></a>
+  </div>
+</div>
+
 {% endraw %}      
 </script>
 
