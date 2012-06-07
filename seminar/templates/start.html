@@ -195,20 +195,25 @@ Seminar.schedule = (function() {
             })
           );
         },
-        error: function(data) {
-          switch(data.reason) {
-            case 'full':
-              alert('클래스 정원이 모두 찼습니다. 등록을 할수 없었습니다');
-              break;
-
-            case 'auth':
-            case 'invalid':
-            default:
-              alert('오류가 발생했습니다, 등록을 할수 없었습니다');
-              break;
-          }
-        }
+        error: registration.error
       });
+    },
+    error: function(data) {
+      if (!(data && data.reason)) {
+        return undefined;
+      }
+      
+      switch(data.reason) {
+        case 'full':
+          alert('클래스 정원이 모두 찼습니다. 등록을 할수 없었습니다');
+          break;
+
+        case 'auth':
+        case 'invalid':
+        default:
+          alert('오류가 발생했습니다, 등록을 할수 없었습니다');
+          break;
+      }
     }
   };
 
