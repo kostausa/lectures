@@ -231,30 +231,6 @@ def begin(hash):
       personal[assignment.session.slot]['sessionid'] = assignment.sessionid
 
     return render_template('start.html', user=user, sessions=personal)
-
-@app.route("/debug/<hash>")
-def debug(hash):
-  user = User.query.filter_by(secret=hash).first()
-  if user is None:
-    return make_response(render_template('notfound.html'), 404)
-  else:
-    session['userid'] = user.id    
-    assigned = Assigned.query.filter_by(userid=user.id).all()    
-    schedules = Schedule.query.filter_by(conf=user.conf).order_by(Schedule.id).all()    
-    personal = {}
-    for schedule in schedules:
-      personal[schedule.slot] = { 
-        'description' : schedule.description,
-        'slot'        : schedule.slot,
-        'assigned'    : None,
-        'sessionid'   : None
-      }
-    for assignment in assigned:
-      lecture = assignment.session.lecture
-      personal[assignment.session.slot]['assigned'] = lecture
-      personal[assignment.session.slot]['sessionid'] = assignment.sessionid
-
-    return render_template('debug.html', user=user, sessions=personal)
     
 @app.route("/")
 def index():
