@@ -317,6 +317,7 @@ def update():
   lecture.abstract = request.form['abstract']
   lecture.schedule = request.form['schedule']
   lecture.bio = request.form['bio']
+  lecture.capacity = int(request.form['capacity'])
   db.session.add(lecture)
   db.session.commit()  
   return jsonify(result=True)

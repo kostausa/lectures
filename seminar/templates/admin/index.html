@@ -252,7 +252,8 @@ Seminar.admin = (function() {
           id: this.get('id'),
           abstract: this.get('abstract'),
           schedule: this.get('schedule'),
-          bio: this.get('bio')
+          bio: this.get('bio'),
+          capacity: this.get('capacity')
         },
         success: function(data) {
           if (!data.result) {
@@ -334,7 +335,7 @@ Seminar.admin = (function() {
     },
     initialize: function() {
       _.bindAll(this, 'render', 'toggleDesc', 'sendRemove', 
-        'unrender', 'sendUpdate', 'dots', 'renderDots', 'reset');
+        'unrender', 'confirm', 'sendUpdate', 'dots', 'renderDots', 'reset');
       
       this.prevSchedule = '';
       this.model
@@ -374,6 +375,14 @@ Seminar.admin = (function() {
       });
 
       this.model.set('schedule', schedule);
+
+      var capacity = $('.capacity-input', this.el).val();
+      if (/^[0-9]+$/.test(capacity) === false) {
+        alert('인원제한은 숫자여야 합니다');
+        return false;
+      }
+
+      this.model.set('capacity', parseInt(capacity));
       this.model.update();
       return false;
     },
@@ -580,7 +589,9 @@ Seminar.admin = (function() {
       {{#schedule}}
       <input type="checkbox" class="slots" value="{{index}}">
       {{/schedule}}
-
+      <div>
+        <input type="text" class="input-small capacity-input" value="{{capacity}}">
+      </div>
       <textarea class="abstract">{{{abstract}}}</textarea>
       <button class="btn btn-success pull-right" data-loading-text="Saving..." data-complete-text="Saved!">Update</button>
     </div>
