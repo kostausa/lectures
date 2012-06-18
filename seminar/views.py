@@ -172,7 +172,7 @@ def register():
 
   slot = targetSession.slot
   user = User.query.filter_by(id=userid).first()
-  if user.conf == 0 and user.track == 'T' and not slot in [2,5]:
+  if not 'admin' in session and user.conf == 0 and user.track == 'T' and not slot in [1,5]:
     return jsonify(result=False, reason='track')
 
   maxpeople = targetSession.lecture.capacity
@@ -230,7 +230,10 @@ def begin(hash):
       personal[assignment.session.slot]['assigned'] = lecture
       personal[assignment.session.slot]['sessionid'] = assignment.sessionid
 
-    return render_template('start.html', user=user, sessions=personal)
+    admin = False
+    if 'admin' in session:
+      admin = True
+    return render_template('start.html', user=user, sessions=personal, admin=admin)
     
 @app.route("/")
 def index():
