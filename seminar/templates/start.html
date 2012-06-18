@@ -69,7 +69,7 @@
       </span>
     </div>
     <div class="content">
-    {% if user.track == 'T' and sessions[item].slot in [1,3,4] %}
+    {% if not admin and user.track == 'T' and sessions[item].slot in [1,3,4] %}
       <div class="trackwarn">
         <i class="icon-chevron-right"></i> <i>주제심화 트랙에서 별도의 순서가 진행됩니다.</i>
       </div>
