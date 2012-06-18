@@ -69,7 +69,7 @@
       </span>
     </div>
     <div class="content">
-    {% if user.track == 'T' and sessions[item].slot in [1,3,5] %}
+    {% if user.track == 'T' and sessions[item].slot in [1,3,4] %}
       <div class="trackwarn">
         <i class="icon-chevron-right"></i> <i>주제심화 트랙에서 별도의 순서가 진행됩니다.</i>
       </div>
@@ -350,7 +350,7 @@ Seminar.schedule = (function() {
       for (i=1;i<num;i++) {
         if (Seminar.context.conf == 0 &&
             Seminar.context.track == 'T' &&
-            (i != 2 && i != 4)) {
+            (i != 2 && i != 5)) {
           // themed track
           $('#session'+i).append(_w.render({}));
           continue;
