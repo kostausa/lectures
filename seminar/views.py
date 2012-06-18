@@ -172,13 +172,13 @@ def register():
 
   slot = targetSession.slot
   user = User.query.filter_by(id=userid).first()
-  if not 'admin' in session and user.conf == 0 and user.track == 'T' and not slot in [1,5]:
+  if user.conf == 0 and user.track == 'T' and not slot in [1,5]:
     return jsonify(result=False, reason='track')
 
   maxpeople = targetSession.lecture.capacity
 
   total = Assigned.query.filter_by(sessionid=sessionid).count()
-  if not maxpeople > total:
+  if not 'admin' in session and not maxpeople > total:
     return jsonify(result=False, reason='full')
 
   assigned = Assigned.query \
