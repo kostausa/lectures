@@ -362,6 +362,7 @@ Seminar.admin = (function() {
     },
     toggleDesc: function() {
       $(".description",this.el).toggle();
+      return false;
     },
     sendUpdate: function() {
       this.prevSchedule = this.model.get('schedule');
