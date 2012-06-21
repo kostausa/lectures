@@ -78,14 +78,8 @@
       {% if sessions[item].assigned != None %}
       <div class="row-fluid">
         <div class="span11">      
-          {% if sessions[item].state == 0 %}
             [ {{ sessions[item].assigned.subject }} ]
             {{ sessions[item].assigned.title }} 
-          {% else %}
-            <s>[ {{ sessions[item].assigned.subject }} ]</s>
-            <s>{{ sessions[item].assigned.title }}</s> 
-            <span class="cancel">(Cancelled)</span>
-          {% endif %}
         </div>
         <div class="span1 right">
           <a href="#{{sessions[item].sessionid}}" class="remove"><img src="/static/img/x.png" alt="remove"></a>
