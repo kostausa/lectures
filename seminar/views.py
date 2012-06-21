@@ -90,6 +90,7 @@ class User(db.Model):
   track = db.Column(db.String(4), unique=False)
   conf = db.Column(db.Integer)
   optional_id = db.Column(db.Integer)
+  assignments = db.relationship('Assigned', backref='user')
 
   def __init__(self, kname, email, gender, secret, track, conf, optional_id):
     self.kname = kname
@@ -105,7 +106,7 @@ class User(db.Model):
 
 class Assigned(db.Model):
   sessionid = db.Column(db.Integer, db.ForeignKey('session.id'), primary_key=True)
-  userid = db.Column(db.Integer, primary_key=True)
+  userid = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
   conf = db.Column(db.Integer)
 
   def __init__(self, sessionid, userid, conf):
@@ -156,6 +157,22 @@ def status(conf):
     .group_by(Assigned.sessionid).all()  
   rs = make_response(render_template('status.html', status=status))
   rs.headers['Content-type'] = 'application/json'  
+  return rs
+
+@app.route("/api/students/<sessionid>")
+def students(sessionid):
+  if not auth():
+    return jsonify(result=False, reason='auth')
+
+  assigned = Assigned.query \
+    .filter_by(sessionid=int(sessionid)) \
+    .filter_by(conf=str(session['conf'])).all()
+
+  if len(assigned) == 0:
+    return jsonify(result=False)
+
+  rs = make_response(render_template('admin/students.html',students=assigned))
+  rs.headers['Content-type'] = 'application/json'
   return rs
 
 @app.route("/api/register", methods=['POST'])

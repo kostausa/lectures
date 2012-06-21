@@ -92,6 +92,59 @@ Seminar.capacity = (function() {
 
   var lectures = {};
   var sessions = {};
+  var roll = {};
+
+  var students = {
+    get: function(sessionid) {
+      if (sessionid in roll) {
+        students.toggle(sessionid);
+        return false;
+      }
+
+      $.ajax({
+        url: '/api/students/'+sessionid,
+        success: function(data) {
+          if (data && data.result) {
+            roll[sessionid] = true;
+            students.show(data, sessionid);
+          } else {
+            students.error();
+          }
+        },
+        error: students.error        
+      });
+    },
+    error: function(data) {
+      alert('오류가 있었습니다');
+    },
+    toggle: function(sessionid) {
+      $('#sl'+sessionid).toggle();      
+    },
+    show: function(data, sessionid) {
+      for (var i in data.students) {
+        var item = data.students[i];
+        item.manual = false;
+        item.last = false;
+
+        if (item.email == '__manual__') {
+          item.manual = true;
+        }
+
+        if (i == (data.students.length - 1)) {
+          item.last = true;
+        }
+      }
+
+      var _s = Hogan.compile($('#_template-student').html());
+      var contacts = "";
+
+      for (var i in data.students) {
+        contacts += _s.render(data.students[i]);
+      }
+      $('#sl'+sessionid).html(contacts);
+      students.toggle(sessionid);
+    }
+  };
 
   var init = {
     data: {
@@ -302,8 +355,11 @@ Seminar.capacity = (function() {
         }
       });
 
-      $('a.title').click(function(e) {
+      $('.session').on('click','a.title',function(e) {
         e.preventDefault();
+        var ids = $(this).attr('href').split('#');
+        var sessionid = ids[1];
+        students.get(sessionid, e.target);
       });
 
       $('#caplist a:first').tab('show');
@@ -325,6 +381,7 @@ Seminar.capacity = (function() {
         {{^open}}<s>{{/open}}
         <a href="#{{sessionid}}" class="title">{{{title}}}</a>
         {{^open}}</s>{{/open}}
+        <div class="hide students" id="sl{{sessionid}}"></div>
       </div>
     </div>
     <div class="span3">
@@ -377,6 +434,14 @@ Seminar.capacity = (function() {
 {% endraw %}      
 </script>
 
+<script type="text/html" id="_template-student">
+{% raw %}
+<div class="students">
+  {{name}} 
+  {{^manual}}&lt;{{email}}&gt;{{/manual}}{{#manual}}&lt;no email&gt;{{/manual}}{{^last}},{{/last}}
+</div>
+{% endraw %}
+</script>
 {% endblock %}
 
 {% block setupjs %}

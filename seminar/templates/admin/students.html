@@ -1,0 +1,12 @@
+{
+    "result": true,
+    "students": 
+    [
+    {% for student in students %}
+      {
+        "name" : "{{student.user.kname}}",
+        "email": "{{student.user.email}}"
+      }{% if not loop.last %},{% endif %}
+    {% endfor %}
+    ]    
+}
