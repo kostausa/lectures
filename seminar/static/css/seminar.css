@@ -53,6 +53,10 @@ body {
           border-radius:5px;
 }
 
+.cancel {
+  color:#a00;
+}
+
 .empty {
   cursor:pointer;
   opacity: 0.5;
