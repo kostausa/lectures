@@ -239,6 +239,7 @@ def begin(hash):
       personal[schedule.slot] = { 
         'description' : schedule.description,
         'slot'        : schedule.slot,
+        'state'       : 0,
         'assigned'    : None,
         'sessionid'   : None
       }
@@ -246,6 +247,7 @@ def begin(hash):
       lecture = assignment.session.lecture
       personal[assignment.session.slot]['assigned'] = lecture
       personal[assignment.session.slot]['sessionid'] = assignment.sessionid
+      personal[assignment.session.slot]['state'] = assignment.session.state
 
     admin = False
     if 'admin' in session:
