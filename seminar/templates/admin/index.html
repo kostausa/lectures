@@ -43,14 +43,17 @@
           <option value="0">기초과목별(Core)</option>
           <option value="1">상황별(Context)</option>
           <option value="2">관심별(Concentration)</option>
-          <option value="3">전문인 그리스도인 (TM)</option>
+          <option value="3">선교(Mission)</option>
+          <option value="4">보라색 카테고리</option>
+          <option value="5">전문인 그리스도인 (TM)</option>
         </select>
         {% else %}
         <select id="seminar-group">
           <option value="0">Thinkers</option>
-          <option value="1">토픽별(Topic)</option>
-          <option value="2">상황별(Context)</option>
-          <option value="3">그룹상담</option>
+          <option value="1">강의(Lecture)</option>
+          <option value="2">디스커션(Discussion)</option>
+          <option value="3">실습(Workshop)</option>
+          <option value="4">그룹상담</option>
         </select>
         {% endif %}
       </div>
@@ -139,19 +142,15 @@
         </label>
         <label class="checkbox">
           <input type="checkbox" name="session" id="session3" value="3">
-          Session 3 &mdash; 수요일 (1:30pm)
+          Session 3 &mdash; 수요일 (3:30pm)
         </label>
         <label class="checkbox">
           <input type="checkbox" name="session" id="session4" value="4">
-          Session 4 &mdash; 수요일 (3:30pm)
+          Session 4 &mdash; 목요일 (1:30pm)
         </label>
         <label class="checkbox">
           <input type="checkbox" name="session" id="session5" value="5">
-          Session 5 &mdash; 목요일 (1:30pm)
-        </label>
-        <label class="checkbox">
-          <input type="checkbox" name="session" id="session6" value="6">
-          Session 6 &mdash; 목요일 (3:30pm)
+          Session 5 &mdash; 목요일 (3:30pm)
         </label>
 
       {% endif %}

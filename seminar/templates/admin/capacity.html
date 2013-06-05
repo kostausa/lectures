@@ -42,10 +42,9 @@
 
     <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
     <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
-    <li><a href="#session3" data-toggle="tab">수요일 1</a></li>
-    <li><a href="#session4" data-toggle="tab">수요일 2</a></li>
-    <li><a href="#session5" data-toggle="tab">목요일 1</a></li>
-    <li><a href="#session6" data-toggle="tab">목요일 2</a></li>
+    <li><a href="#session3" data-toggle="tab">수요일</a></li>
+    <li><a href="#session4" data-toggle="tab">목요일 1</a></li>
+    <li><a href="#session5" data-toggle="tab">목요일 2</a></li>
 
     {% endif %}
 
@@ -67,12 +66,6 @@
     <div class="tab-pane" id="session5">
       <ul class="session" id="schedule5"></ul>
     </div>  
-
-    {% if conf is odd %}
-    <div class="tab-pane" id="session6">
-      <ul class="session" id="schedule6"></ul>
-    </div>  
-    {% endif %}
 
   </div>
 
@@ -294,14 +287,18 @@ Seminar.capacity = (function() {
             break;
 
           case '1':
-            name = '토픽별 (Topic)';
+            name = '강의 (Lecture)';
             break;
 
           case '2':
-            name = '상황별 (Context)';
+            name = '디스커션 (Discussion)';
             break;
 
           case '3':
+            name = '실습 (Workshop)';
+            break;
+
+          case '4':
           default:
             name = '그룹상담';
             break;
@@ -323,6 +320,14 @@ Seminar.capacity = (function() {
             break;
 
           case '3':
+            name = '선교 (Mission)';
+            break;
+
+          case '4':
+            name = '보라색 카테고리 (?)';
+            break;            
+
+          case '5':
           default:
             name = '전문인 그리스도인 (TM)';
             break;
