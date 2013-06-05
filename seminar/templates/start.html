@@ -384,7 +384,7 @@ Seminar.schedule = (function() {
               init.dots(item.lecture.schedule);
 
             item.lecture.open = true;
-            {% if user.conf is odd or not admin %}
+            {% if not admin %}
             if (("_" + item.lecture.sessionid) in init.data.status) {
               var capacity = item.lecture.capacity;
               var filled = init.data.status['_'+item.lecture.sessionid];
