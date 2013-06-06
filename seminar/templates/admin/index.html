@@ -324,8 +324,9 @@ Seminar.admin = (function() {
     }
   });
 
-  var LectureView = Backbone.View.extend({
+  var LectureView = Backbone.View.extend({    
     dirty: false,
+    numSessions: {{ schedules | length }},
     className: 'lecture-entry',
     events: {
       "click a": "toggleDesc",
@@ -392,7 +393,7 @@ Seminar.admin = (function() {
     },
     dots: function(schedule) {
       var i;
-      var num = (Seminar.context.conf == 0)?5:6;
+      var num = this.numSessions;
       var dots = [];
       for (i=0;i<num;i++) {
         dots[i] = {

@@ -236,6 +236,7 @@ def begin(hash):
     schedules = Schedule.query.filter_by(conf=user.conf).order_by(Schedule.id).all()    
     personal = {}
 
+    # TODO: Load this from model
     specialsessions = [2,3,5]
 
     for schedule in schedules:
@@ -424,10 +425,12 @@ def admin():
     return redirect('/admin/login')
   chicago=False
   conf="Indianapolis"
+  
+  schedules = Schedule.query.filter_by(conf=int(session['conf'])).order_by(Schedule.id).all()
   if session['conf'] == '0':
     chicago=True
     conf="Chicago"
-  return render_template('admin/index.html', conf=conf, chicago=chicago)
+  return render_template('admin/index.html', conf=conf, chicago=chicago, schedules=schedules)
 
 @app.route("/admin/member/list")
 def listmember():

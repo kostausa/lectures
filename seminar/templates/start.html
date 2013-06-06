@@ -141,7 +141,10 @@ var Seminar = {};
 
 Seminar.context = {
   conf: {{user.conf}},
-  track: '{{user.track}}'
+  track: '{{user.track}}',
+  specialsessions: [
+    {% for item in specialsessions %}{% if not loop.first %},{% endif %}{{item}}{% endfor %}
+  ]
 };
 
 Seminar.schedule = (function() {
@@ -232,6 +235,7 @@ Seminar.schedule = (function() {
   };
 
   var init = {
+    numSessions: {{ sessions | length }},
     data: {
       "lecture": undefined,
       "status" : undefined
@@ -350,7 +354,7 @@ Seminar.schedule = (function() {
     },
     dots: function(schedule) {
       var i;
-      var num = (Seminar.context.conf == 0)?5:6;
+      var num = init.numSessions;
       var dots = [];
       for (i=0;i<num;i++) {
         dots[i] = 'unoccupied';
@@ -371,12 +375,12 @@ Seminar.schedule = (function() {
       var _g = Hogan.compile($('#_template-grouping').html());
 
       var i;
-      var num = (Seminar.context.conf == 0)?6:7;
+      var num = init.numSessions;
 
-      for (i=1;i<num;i++) {
+      for (i=1;i<=num;i++) {
         if (Seminar.context.track != 'N' &&
-            (i != 1 && i != 4)) {
-          // themed track
+            Seminar.context.specialsessions.indexOf(i) != -1)
+        {
           $('#session'+i).append(_w.render({}));
           continue;
         }
@@ -542,7 +546,7 @@ Seminar.schedule = (function() {
 
 <script type="text/html" id="_template-trackwarn">
 <div class="empty">
-주제심화트랙 시간입니다.
+트랙 프로그램 시간입니다.
 </div>
 </script>
 
