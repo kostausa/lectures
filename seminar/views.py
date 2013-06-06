@@ -235,6 +235,9 @@ def begin(hash):
     assigned = Assigned.query.filter_by(userid=user.id).all()    
     schedules = Schedule.query.filter_by(conf=user.conf).order_by(Schedule.id).all()    
     personal = {}
+
+    specialsessions = [2,3,5]
+
     for schedule in schedules:
       personal[schedule.slot] = { 
         'description' : schedule.description,
@@ -252,7 +255,11 @@ def begin(hash):
     admin = False
     if 'admin' in session:
       admin = True
-    return render_template('start.html', user=user, sessions=personal, admin=admin)
+    return render_template('start.html', 
+                           user=user, 
+                           sessions=personal, 
+                           admin=admin,
+                           specialsessions=specialsessions)
     
 @app.route("/")
 def index():

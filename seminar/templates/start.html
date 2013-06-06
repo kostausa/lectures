@@ -11,18 +11,31 @@
 <div id="schedule">
   <ul class="nav nav-tabs" id="lectures">
 
-    <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
-    <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
-    <li><a href="#session3" data-toggle="tab">수요일 </a></li>
-    <li><a href="#session4" data-toggle="tab">목요일 1</a></li>
-    <li><a href="#session5" data-toggle="tab">목요일 2</a></li>
+    {% if user.track == 'N' %}
+      <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
+      <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
+      <li><a href="#session3" data-toggle="tab">수요일 </a></li>
+      <li><a href="#session4" data-toggle="tab">목요일 1</a></li>
+      <li><a href="#session5" data-toggle="tab">목요일 2</a></li>
+    {% else %}
+      <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
+      <li><a href="#session4" data-toggle="tab">목요일 1</a></li>
+    {% endif %}
 
   </ul>
   <div class="tab-content">
     {% for item in sessions %}  
+    
     <div class="tab-pane{% if loop.first %} active{% endif %}" id="session{{sessions[item].slot}}">
-      <ul class="session" id="schedule{{sessions[item].slot}}"></ul>
+
+    {% if user.track == 'N' or not sessions[item].slot in specialsessions %}
+
+        <ul class="session" id="schedule{{sessions[item].slot}}"></ul>
+
+    {% endif %}
+
     </div>  
+
     {% endfor %}
   </div>
 </div>
@@ -40,8 +53,14 @@
 <div class="hd">선택식 세미나 Schedule</div>
 <div class="user">
   <i class="icon-home"></i>
-  {{user.kname}} | {{user.gender}} | {{user.email | replace('__manual__','')}}
-  {{user.track | replace('T','| 주제심화트랙') | replace('N','')}}
+  {{user.kname}} | {{user.gender}} | {{user.email | replace('__manual__','')}}  
+  {{ user.track | replace('W', '기독교 세계관')
+                | replace('C', '기독교 문화관')
+                | replace('T', '주제심화')
+                | replace('M', '청년사역자')
+                | replace('N', '일반')
+  }}
+  트랙
 </div>
 
 
@@ -57,12 +76,19 @@
       </span>
     </div>
     <div class="content">
-    {% if not admin and user.track == 'T' and sessions[item].slot in [1,3,4] %}
+    {% if not user.track == 'N' and sessions[item].slot in specialsessions %}
       <div class="trackwarn">
-        <i class="icon-chevron-right"></i> <i>주제심화 트랙에서 별도의 순서가 진행됩니다.</i>
+        <i class="icon-chevron-right"></i> 
+        <i>
+          {{ user.track | replace('W', '기독교 세계관')
+                        | replace('C', '기독교 문화관')
+                        | replace('T', '주제심화')
+                        | replace('M', '청년사역자')
+          }}
+         트랙에서 별도의 순서가 진행됩니다.
+        </i>
       </div>
     {% else %}
-
       {% if sessions[item].assigned != None %}
       <div class="row-fluid">
         <div class="span11">      
