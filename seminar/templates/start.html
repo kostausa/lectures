@@ -11,16 +11,11 @@
 <div id="schedule">
   <ul class="nav nav-tabs" id="lectures">
 
-    {% if user.track == 'N' %}
       <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
       <li><a href="#session2" data-toggle="tab">화요일 2</a></li>
       <li><a href="#session3" data-toggle="tab">수요일 </a></li>
       <li><a href="#session4" data-toggle="tab">목요일 1</a></li>
       <li><a href="#session5" data-toggle="tab">목요일 2</a></li>
-    {% else %}
-      <li class="active"><a href="#session1" data-toggle="tab">화요일 1</a></li>
-      <li><a href="#session4" data-toggle="tab">목요일 1</a></li>
-    {% endif %}
 
   </ul>
   <div class="tab-content">
@@ -337,6 +332,14 @@ Seminar.schedule = (function() {
             break;
 
           case '3':
+            name = '선교 (Missions)';
+            break;
+
+          case '4':
+            name = '기혼자와 강사와의 만남';
+            break;
+
+          case '5':
           default:
             name = '전문인 그리스도인 (TM)';
             break;
@@ -371,9 +374,8 @@ Seminar.schedule = (function() {
       var num = (Seminar.context.conf == 0)?6:7;
 
       for (i=1;i<num;i++) {
-        if (Seminar.context.conf == 0 &&
-            Seminar.context.track == 'T' &&
-            (i != 2 && i != 5)) {
+        if (Seminar.context.track != 'N' &&
+            (i != 1 && i != 4)) {
           // themed track
           $('#session'+i).append(_w.render({}));
           continue;
