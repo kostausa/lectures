@@ -50,7 +50,7 @@
 
     /* Styling your links has become much simpler with the new Yahoo.  In fact, it falls in line with the main credo of styling in email and make sure to bring your styles inline.  Your link colors will be uniform across clients when brought inline.
     Bring inline: Yes. */
-    a {color: blue;}
+    a {color: orange;}
 
 
     /***************************************************
@@ -69,7 +69,7 @@
 
       .mobile_link a[href^="tel"], .mobile_link a[href^="sms"] {
             text-decoration: default;
-            color: blue !important;
+            color: orange !important;
             pointer-events: auto;
             cursor: default;
           }
@@ -90,7 +90,7 @@
 
       .mobile_link a[href^="tel"], .mobile_link a[href^="sms"] {
             text-decoration: default;
-            color: blue !important;
+            color: orange !important;
             pointer-events: auto;
             cursor: default;
           }
@@ -134,11 +134,19 @@
   <![endif]-->
 </head>
 <body>
-<table cellpadding="10" cellspacing="0" border="0" id="backgroundTable">
+<!-- Wrapper/Container Table: Use a wrapper table to control the width and the background color consistently of your email. Use this approach instead of setting attributes on the body tag. -->
+<table cellpadding="5" cellspacing="0" border="0" id="backgroundTable">
   <tr>
     <td valign="top"> 
-
+    <!-- Tables are the most common way to format your email consistently. Set your table widths inside cells and in most cases reset cellpadding, cellspacing, and border to zero. Use nested tables as a way to space effectively in your message. -->
+    <table cellpadding="0" cellspacing="0" border="0" align="center">
+      <tr>
+        <td width="95%" valign="top">
           {% block content %}{% endblock %}
+        </td>
+      </tr>
+    </table>
+    <!-- End example table -->
 
     </td>
   </tr>
