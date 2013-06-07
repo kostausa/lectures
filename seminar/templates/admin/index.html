@@ -317,9 +317,8 @@ Seminar.admin = (function() {
           }
           _self.trigger('loaded');
         },
-        error: function(data) {
+        error: function(data, status, err) {
           alert('error loading lecture');
-          console.log(data);
         }
       });      
     }
