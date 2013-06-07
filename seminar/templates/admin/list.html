@@ -9,7 +9,7 @@
     "bio": "{{lecture.bio}}",
     "capacity": {{lecture.capacity}},
     "schedule" : "{{lecture.schedule}}",
-    "abstract" : "{{lecture.abstract|escape|replace("\n","\\n")|replace("\r","\\r")}}"
+    "abstract" : "{{lecture.abstract|replace("\n","\\n")|replace("\r","\\r")}}"
   }{% if not loop.last %},{% endif %}
 {% endfor %}
 ]
