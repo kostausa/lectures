@@ -25,7 +25,7 @@ def sendlink(user,h):
     ).encode('UTF-8'), 'html', 'UTF-8'
   )
   
-  msg['Subject'] = app.config['YEAR'] + ' KOSTA/USA Seminar'
+  msg['Subject'] = str(app.config['YEAR']) + ' KOSTA/USA Seminar'
   msg['From'] = 'webhelp@kostausa.org'
   msg['To'] = user.email
 
