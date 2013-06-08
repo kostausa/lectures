@@ -90,9 +90,10 @@ class User(db.Model):
   track = db.Column(db.String(4), unique=False)
   conf = db.Column(db.Integer)
   optional_id = db.Column(db.Integer)
+  status = db.Column(db.Integer)
   assignments = db.relationship('Assigned', backref='user')
 
-  def __init__(self, kname, email, gender, secret, track, conf, optional_id):
+  def __init__(self, kname, email, gender, secret, track, conf, optional_id, status):
     self.kname = kname
     self.email = email
     self.gender = gender
@@ -100,6 +101,7 @@ class User(db.Model):
     self.track = track
     self.conf = conf
     self.optional_id = optional_id
+    self.status = status
 
   def __repr__(self):
     return ''   
@@ -274,7 +276,7 @@ def login():
 def link():
   email=request.form['email']
   conf=request.form['conf']
-  user = User.query.filter_by(email=email).filter_by(conf=conf).first()
+  user = User.query.filter_by(email=email).filter_by(conf=conf).filter_by(status=0).first()
   if user is None:
     return jsonify(result='invalid')
   elif user.track == 'J':
@@ -455,7 +457,7 @@ def newmember():
   except Exception:
     optional = 0
 
-  member = User(name, '__manual__', gender, '', track, int(conf), optional)
+  member = User(name, '__manual__', gender, '', track, int(conf), optional, 0)
   db.session.add(member)
   db.session.commit()
 
