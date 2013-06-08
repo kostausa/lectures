@@ -276,9 +276,11 @@ def login():
 def link():
   email=request.form['email']
   conf=request.form['conf']
-  user = User.query.filter_by(email=email).filter_by(conf=conf).filter_by(status=0).first()
+  user = User.query.filter_by(email=email).filter_by(conf=conf).first()
   if user is None:
     return jsonify(result='invalid')
+  elif not user.status == 0:
+    return jsonify(result='incomplete')
   elif user.track == 'J':
     # Journey KOSTA cannot register
     return jsonify(result='journey')
