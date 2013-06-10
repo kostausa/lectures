@@ -9,6 +9,7 @@ from flask import render_template
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 
+specialsessions = [2,3,5]
 
 def auth():
   if 'admin' in session and session['admin']:
@@ -189,9 +190,11 @@ def register():
   if targetSession is None:
     return jsonify(result=False, reason='invalid')
 
+  global specialsessions
+
   slot = targetSession.slot
   user = User.query.filter_by(id=userid).first()
-  if user.conf == 0 and user.track == 'T' and not slot in [2,5]:
+  if user.conf == 0 and not user.track == 'N' and slot in specialsessions:
     return jsonify(result=False, reason='track')
 
   maxpeople = targetSession.lecture.capacity
@@ -239,8 +242,8 @@ def begin(hash):
     personal = {}
 
     # TODO: Load this from model
-    specialsessions = [2,3,5]
-
+    global specialsessions
+    
     for schedule in schedules:
       personal[schedule.slot] = { 
         'description' : schedule.description,
