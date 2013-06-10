@@ -137,6 +137,10 @@ ul.session  {
 }
 
 .footnote {
+  font-family:'NanumGothic','NanumGothicOTF','NanumGothicOTFBold', 'Helvetica Neue', 'Helvetica', 'Arial';  
   margin-top:30px;
 }
 
+.footnote .format {
+  color: #25c;
+}
