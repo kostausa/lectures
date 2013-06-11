@@ -169,17 +169,22 @@ Seminar.capacity = (function() {
 
       for (var i in data.sessions) {
         var item = data.sessions[i];
-        if (item.state != 0 ||
-            !(item.lectureid in lectures)) {
+
+        if (!(item.lectureid in lectures)) {
           // not offered
           continue;
         }
 
         // client side join, yeah!
-        var slot = item.slot;
+        var slot = item.slot;        
         item.lecture = $.extend({},lectures[item.lectureid]);
         item.lecture.sessionid = item.id;
         item.lecture.slot = item.slot;
+        item.lecture.canceled = false;
+        if (item.state != 0)
+        {
+          item.lecture.canceled = true;
+        }
 
         var paragraphs = item.lecture.abstract.split(/\n/);
         item.lecture.abstract = paragraphs;
@@ -222,13 +227,6 @@ Seminar.capacity = (function() {
       var num = (Seminar.context.conf == 0)?6:7;
 
       for (i=1;i<num;i++) {
-        if (Seminar.context.conf == 0 &&
-            Seminar.context.track == 'T' &&
-            (i != 2 && i != 4)) {
-          // themed track
-          $('#session'+i).append(_w.render({}));
-          continue;
-        }
         var el = $('#schedule'+i);
 
         var gap = false;
@@ -262,6 +260,10 @@ Seminar.capacity = (function() {
                 // just client-side check
                 // backend does more proper check when button is pressed.
               }
+            }
+            if (item.lecture.canceled)
+            {
+              item.lecture.open = false;
             }
 
             var source = {
@@ -382,7 +384,7 @@ Seminar.capacity = (function() {
     <div class="span9">
       [{{subject}}] {{speaker}}
       <div style="margin-top:2px;">
-        &mdash; 
+        &mdash;
         {{^open}}<s>{{/open}}
         <a href="#{{sessionid}}" class="title">{{{title}}}</a>
         {{^open}}</s>{{/open}}
@@ -398,7 +400,8 @@ Seminar.capacity = (function() {
         {{/open}}
         {{^open}}
           <span class="fill">
-            Closed
+            {{#canceled}}Canceled{{/canceled}}
+            {{^canceled}}Closed{{/canceled}}
           </span>
         {{/open}}
       </div>
