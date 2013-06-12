@@ -118,6 +118,34 @@ Seminar.admin = (function() {
 
       return false;
     },
+    "save": function(id, gender, track)
+    {
+      $.ajax({
+        type: 'POST',
+        url: '/admin/members/save',
+        data: {
+          "id"     : id,
+          "gender" : gender,
+          "track"  : track
+        },
+        success: function(data) {
+          if (data && data.result)
+          {
+            var id = data.id; 
+            $('.gender_'+id).html(data.gender);
+            $('.track_'+id).html(data.track);            
+            $('#b_'+id).button('complete').addClass('btn-success');
+            setTimeout(function() {
+              $('#b_' + id).removeClass('btn-success').button('reset');
+              $('#p_' + id).slideToggle('fast');
+            },1200);
+          }
+          else {
+            alert('오류가 있었습니다');
+          }
+        }
+      });
+    },
     "search": function() {
       var term = $('#search').val();
       $.ajax({
@@ -135,6 +163,7 @@ Seminar.admin = (function() {
                 item.email = item.email.replace('__manual__', '추가등록');
               }
             }
+
             var _s = Hogan.compile($('#_template-searchresult').text());
             $('#searchresult').html(_s.render(data));
 
@@ -159,6 +188,21 @@ Seminar.admin = (function() {
         e.preventDefault();
         user.search();
       });
+      $('#searchresult')
+        .on('click', '.editm', function(e) {
+          e.preventDefault();
+          var idstr = $(this).attr('id');
+          var selector = "#p_" + idstr.split('_')[1];
+          $(selector).slideToggle('fast');
+        })
+        .on('click', 'button.save', function(e) {
+          e.preventDefault();
+          var idstr = $(this).attr('id');
+          var id = idstr.split('_')[1];
+          var gender = $("#g_"+id).val();
+          var track  = $("#t_"+id).val();
+          user.save(id, gender, track);
+        });
     }
   }
 })();
@@ -167,7 +211,7 @@ Seminar.admin = (function() {
 {% raw %}
 
 <div>
-  {{name}} | {{gender}} | {{track}} | {{optional}}
+  {{name}} | <span class="gender_{{id}}">{{gender}}</span> | <span class="track_{{id}}">{{track}}</span> | {{optional}}
   <a href="/open/{{secret}}">http://seminar.kostausa.org/open/{{secret}}</a>
 </div>
 
@@ -179,9 +223,17 @@ Seminar.admin = (function() {
 <i class="icon-search"></i> <strong>검색결과</strong>
 {{#members}}
   <div>
-    {{name}} | {{email}} | {{gender}} | {{track}} | <a href="/open/{{secret}}">http://seminar.kostausa.org/open/{{secret}}</a>
+    {{name}} | {{email}} | <span class="gender_{{id}}">{{gender}}</span> | <span class="track_{{id}}">{{track}}</span> | <a href="/open/{{secret}}">http://seminar.kostausa.org/open/{{secret}}</a> <a href="#" class="editm" id="e_{{id}}">edit</a>
+    <div class="hide editpanel" id="p_{{id}}">
+      <form class="form-inline">
+        성별 <input type="text" class="input-small" id="g_{{id}}" value="{{gender}}">
+        트랙 <input type="text" class="input-small" id="t_{{id}}" value="{{track}}">
+        <button type="button" class="save btn" id="b_{{id}}" data-complete-text="Saved!">Save</button>     
+      </form>
+    </div>
   </div>
 {{/members}}
+<div class="legend">(N=일반,W=세계관,C=문화관,M=청년사역,T=주제심화)</div>
 
 {% endraw %}
 </script>

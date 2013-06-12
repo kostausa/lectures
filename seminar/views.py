@@ -496,6 +496,33 @@ def searchmember():
   rs.headers['Content-type'] = 'application/json'
   return rs
 
+@app.route("/admin/members/save", methods=['POST'])
+def editmember():
+  if not auth():
+    return redirect('/admin/login')
+
+  id = request.form['id']
+  gender = request.form['gender']
+  track = request.form['track']
+
+  if not id or not gender or not track:
+    return jsonify(result=False, reason='invalid')
+
+  if not gender in ['M', 'F']:
+    return jsonify(result=False, reason="gender")
+
+  if not track in ['N','W','C','M','T']:
+    return jsonify(result=False, reason="track")
+
+  member = User.query.filter_by(id=id).first()  
+  member.gender = gender
+  member.track = track
+
+  db.session.add(member)
+  db.session.commit()
+
+  return jsonify(result=True, id=id, gender=gender, track=track)
+
 @app.route("/admin/members")
 def members():
   if not auth():
